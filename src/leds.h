@@ -13,5 +13,6 @@
 #define LED_BRIGHTNESS 120
 
 void setupLEDs();
+void updateLEDs();
 
 #endif
