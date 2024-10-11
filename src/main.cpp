@@ -8,5 +8,8 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+
+    loopInput();
+
+    delay(1);
 }
