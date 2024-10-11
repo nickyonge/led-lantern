@@ -49,10 +49,10 @@
             "defines": [
                 "PLATFORMIO=60117",
                 "ARDUINO_AVR_ATTINYX4",
+                "CLOCK_SOURCE=0",
                 "F_CPU=8000000L",
                 "ARDUINO_ARCH_AVR",
                 "ARDUINO=10808",
-                "CLOCK_SOURCE=0",
                 "NEOPIXELPORT=PORTA",
                 "__AVR_ATtiny84__",
                 ""
