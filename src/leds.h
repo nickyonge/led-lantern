@@ -10,6 +10,8 @@
 
 #define NUM_LEDS 12
 
+#define LED_BRIGHTNESS 120
+
 void setupLEDs();
 
 #endif
