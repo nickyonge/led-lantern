@@ -4,5 +4,6 @@
 #include <Arduino.h>
 
 #include "leds.h"
+#include "input.h"
 
 #endif
