@@ -1,5 +1,7 @@
 #include "leds.h"
 
-void setupLEDs() {
-    
+CRGB leds[NUM_LEDS];
+
+void setupLEDs()
+{
 }
