@@ -14,7 +14,7 @@
 #define LED_BRIGHTNESS 120
 
 void setupLEDs();
-void shiftLEDColor(int delta);
+void shiftLEDColor(int delta); // shift the current LED colouru by the given amount
 void updateLEDs();
 
 #endif
