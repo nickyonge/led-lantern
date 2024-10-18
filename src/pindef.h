@@ -52,3 +52,50 @@ AVR Fuse Calculator (for using RESET pin as I/O):
 https://www.engbedded.com/fusecalc/
 
 */
+
+
+// Warnings to ensure ATtinyX4's Arduino pinmapping is defined correctly
+#ifdef __AVR_ATtinyX4__                            // ensure relevant platform
+#pragma GCC diagnostic push                        // to prevent "unknown pragma" IDE warning, we have to add an ignore rule to GCC diagnostic
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // disable "unknown pragma" to allow for #region style code-folding
+
+#pragma region ATTINYX4_PINMAPPING_DEFINITION
+// --- pinmapping definition check start ---
+
+// SETUP: Uncomment ONE of the two definitions below to select the desired pinmapping:
+
+#define USE_CW_PINMAPPING // this project uses CLOCKWISE (CW) pinmapping
+// #define USE_CCW_PINMAPPING // this project uses COUNTERCLOCKWISE (CCW) pinmapping
+
+#ifdef USE_CW_PINMAPPING
+#ifdef USE_CCW_PINMAPPING
+#error "Both CW and CCW pinmappings are specified - only one may be selected!"
+#else
+#ifdef PINMAPPING_CCW
+#error "Project uses CW pin mapping, but CCW pinmapping is defined! Ensure ini board_build.variant is tinyX4_reverse (optional if board is attiny84_cw_pinmap), or omitted (if board is attiny84)"
+#else
+#ifndef PINMAPPING_CW
+#error "Project uses CW pin mapping, but PINMAPPING_CW is undefined! Ensure ini board_build.variant is omitted (if board is attiny84), or that it's tinyX4 (optional, or if board is attiny84_cw_pinmap)"
+#endif
+#endif
+#endif
+#else
+#ifndef USE_CCW_PINMAPPING
+#error "Neither CW or CCW pinmappings are specified - one must be selected!"
+#else
+#ifdef PINMAPPING_CW
+#error "Project uses CCW pin mapping, but CW pinmapping is defined! Ensure ini board_build.variant is omitted (if board is attiny84), or that it's tinyX4 (optional, or if board is attiny84_cw_pinmap)"
+#else
+#ifndef PINMAPPING_CCW
+#error "Project uses CCW pin mapping, but PINMAPPING_CCW is undefined! Ensure ini board_build.variant is tinyX4_reverse (optional if board is attiny84_cw_pinmap), or omitted (if board is attiny84)"
+#endif
+#endif
+#endif
+#endif
+// for more info see: https://github.com/SpenceKonde/ATTinyCore/blob/77ae92aafb2294f9838c3e15575c2b5477066439/avr/extras/ATtiny_x4.md#pin-mapping-options
+// --- pinmapping definition check end ---
+#pragma endregion
+
+#pragma GCC diagnostic pop // re-enable unknown pragma errors
+#endif
+// end pinmapping warnings
