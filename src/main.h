@@ -5,5 +5,6 @@
 
 #include "leds.h"
 #include "input.h"
+#include "sleep.h"
 
 #endif

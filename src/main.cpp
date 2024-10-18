@@ -1,15 +1,17 @@
 #include "main.h"
 
-void setup() {
-
+void setup()
+{
+    // call class-specific setup functions
     setupLEDs();
     setupInput();
-
+    setupSleep();
 }
 
-void loop() {
-
+void loop()
+{
     loopInput();
 
+    // 1ms loop interval
     delay(1);
 }
