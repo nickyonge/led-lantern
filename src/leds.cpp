@@ -7,7 +7,7 @@ static int ledColor = 213;
 void setupLEDs()
 {
     FastLED.setBrightness(LED_BRIGHTNESS);
-    FastLED.addLeds<CHIPSET, LED_DATA_PIN, RGB_ORDER>(leds, NUM_LEDS);
+    FastLED.addLeds<CHIPSET, PIN_LED_DATA, GRB>(leds, NUM_LEDS);
     updateLEDs();
 }
 
