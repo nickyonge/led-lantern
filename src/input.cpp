@@ -1,24 +1,46 @@
 #include "input.h"
 #include <EnableInterrupt.h>
 
-static int encPos = 0;                 // current position of rotary encoder
+static volatile int encPos = 0;        // current position of rotary encoder
 static bool encSwitch = false;         // is rotary encoder switch currently pressed?
 volatile bool lastInterrupted = false; // was interrupt called before last loop cylce?
 
-RotaryEncoder encoder(PIN_ENC_CLK, PIN_ENC_DAT, RotaryEncoder::LatchMode::FOUR3);
+#ifdef POLL_ENCODER_INTERRUPTS
+RotaryEncoder *encoder = nullptr;
+#else
+RotaryEncoder encoder(PIN_ENC_CLK, PIN_ENC_DAT, ENC_LATCH_MODE);
+#endif
 
 void setupInput()
 {
+// create encoder if necessary
+#ifdef POLL_ENCODER_INTERRUPTS
+    encoder = new RotaryEncoder(PIN_ENC_CLK, PIN_ENC_DAT, ENC_LATCH_MODE);
+#endif
     // encoder switch pin
     pinMode(PIN_ENC_SWITCH, INPUT_PULLUP);
     // enable interrupt on enc switch pin
-    enableInterrupt(PIN_ENC_SWITCH, onInterrupt, FALLING);
+    enableInterrupt(PIN_ENC_SWITCH, interruptSwitch, FALLING);
+    // check for encoder data interrupts
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENCODER_ROTATION_WAKES_FROM_SLEEP)
+    enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
+    enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);
+#endif
 }
 
-void onInterrupt()
+void interruptSwitch()
 {
     lastInterrupted = true;
 }
+
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENCODER_ROTATION_WAKES_FROM_SLEEP)
+void interruptEncoder()
+{
+#ifdef POLL_ENCODER_INTERRUPTS
+    encoder->tick();
+#endif
+}
+#endif
 
 void loopInput()
 {
@@ -39,10 +61,15 @@ void loopInput()
     }
 #endif
 
-    // update rotary encoder movement
-    encoder.tick();
+    // update and read rotary encoder movement
+#ifdef POLL_ENCODER_INTERRUPTS
+    // encoder->tick();
+    int newPos = encoder->getPosition();
+#else
+    // encoder.tick();
+    int newPos = encoder.getPosition();
+#endif
 
-    int newPos = encoder.getPosition(); // read movement
     // check for position change
     if (encPos != newPos)
     {
