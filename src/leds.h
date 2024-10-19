@@ -17,4 +17,4 @@ void setupLEDs();
 void shiftLEDColor(int delta); // shift the current LED colouru by the given amount
 void updateLEDs();
 
-#endif
+#endif // LEDS_H

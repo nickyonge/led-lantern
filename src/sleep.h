@@ -8,4 +8,4 @@ void setupSleep();
 
 void goToSleep(); // puts device to sleep, until any interrupt is received
 
-#endif
+#endif // SLEEP_H

@@ -17,4 +17,4 @@ static int encPos = 0;         // current position of rotary encoder
 static bool encSwitch = false; // is rotary encoder switch currently pressed?
 volatile bool lastInterrupted; // was interrupt called before last loop cylce?
 
-#endif
+#endif // INPUT_H

@@ -7,4 +7,4 @@
 #include "input.h"
 #include "sleep.h"
 
-#endif
+#endif // MAIN_H
