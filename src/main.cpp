@@ -13,6 +13,8 @@ void loop()
 {
     loopInput();
     loopSaveData();
+    loopSleep();
+    
 
     // 1ms loop interval
     delay(1);

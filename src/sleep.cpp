@@ -7,6 +7,10 @@ void setupSleep()
     // info on sleep modes: https://onlinedocs.microchip.com/oxy/GUID-A834D554-5741-41A3-B5E1-35ED7CD8250A-en-US-5/GUID-35CAFA19-CA93-4B3E-AEE3-481B8542FE94.html
 }
 
+void loopSleep() {
+    
+}
+
 void goToSleep()
 {
     sleepInput();        // put input system to sleep

@@ -7,6 +7,7 @@
 #include "input.h"
 
 void setupSleep();
+void loopSleep();
 
 void goToSleep(); // puts device to sleep, until any interrupt is received
 
