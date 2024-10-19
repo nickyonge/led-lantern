@@ -1,4 +1,5 @@
 #include "input.h"
+#include <EnableInterrupt.h>
 
 RotaryEncoder encoder(PIN_ENC_CLK, PIN_ENC_DAT, RotaryEncoder::LatchMode::FOUR3);
 

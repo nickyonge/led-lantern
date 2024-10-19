@@ -2,8 +2,8 @@
 #define INPUT_H
 
 #include <Arduino.h>
+
 #include <RotaryEncoder.h>
-#include <EnableInterrupt.h>
 
 #include "pindef.h"
 #include "leds.h"
