@@ -5,6 +5,7 @@
 #include <FastLED.h>
 
 #include "pindef.h"
+#include "savedata.h"
 
 #define CHIPSET WS2812B
 #define RGB_ORDER GRB
@@ -14,7 +15,10 @@
 #define LED_BRIGHTNESS 120
 
 void setupLEDs();
-void shiftLEDColor(int delta); // shift the current LED colouru by the given amount
+void shiftLEDColor(int delta); // shift the current LED colour by the given amount
 void updateLEDs();
+void clearLEDLocalData();
+void loadLEDData();
+void saveLEDData();
 
 #endif // LEDS_H
