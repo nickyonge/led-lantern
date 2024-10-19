@@ -22,15 +22,22 @@ void onInterrupt()
 
 void loopInput()
 {
-    // check for interrupt since previous cycle  
-    if (lastInterrupted) {
+    // check for interrupt since previous cycle
+    if (lastInterrupted)
+    {
         // yup, interrupt detected
         lastInterrupted = false;
     }
 
-    // read rotary encoder switch
+// read rotary encoder switch
+#ifdef USE_ENCODER_SWITCH_LOGIC
     bool lastSwitch = encSwitch;
     encSwitch = !digitalRead(PIN_ENC_SWITCH); // NC switch, invert
+    if (lastSwitch != encSwitch)
+    {
+        // switch state toggled, do stuff...
+    }
+#endif
 
     // update rotary encoder movement
     encoder.tick();
@@ -39,9 +46,9 @@ void loopInput()
     // check for position change
     if (encPos != newPos)
     {
-        // position changed, read movement delta 
+        // position changed, read movement delta
         int delta = encPos - newPos;
-        // update LED colour by delta amount 
+        // update LED colour by delta amount
 
         shiftLEDColor(delta);
         encPos = newPos;

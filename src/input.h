@@ -8,6 +8,8 @@
 #include "pindef.h"
 #include "leds.h"
 
+#define USE_ENCODER_SWITCH_LOGIC
+
 void setupInput();
 void loopInput();
 
