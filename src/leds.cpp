@@ -6,13 +6,17 @@ CRGB leds[NUM_LEDS];
 static int ledColor = DATA_DEFAULT_LED_HUE; // current LED HSV hue
 
 static CRGB colorsArray[NUM_LEDS];
+bool clearLEDs = false;
 
 #ifndef DISABLE_ANIMATION
-bool clearLEDs = false;
 bool animate = true;
 bool reverseAnimDirection = false;
 int animTimer = 0;
 #endif
+
+//
+// ------------------------------------------------------------ [  SETUP AND LOOP  ] --------- 
+//
 
 void setupLEDs()
 {
@@ -48,33 +52,48 @@ void loopLEDs()
 #endif
 }
 
+//
+// ------------------------------------------------------------ [  LED DISPLAY LOGIC  ] --------- 
+//
+
 void updateLEDs()
 {
 #ifndef DISABLE_ANIMATION
-    // if (clearLEDs)
-    // {
-    //     for (int i = 0; i < NUM_LEDS; i++)
-    //     {
-    //         colorsArray[i] = CRGB::Black;
-    //     }
-    //     clearLEDs = false;
-    // }
-    // else if (!animate)
-    if (!animate)
+    if (clearLEDs)
     {
         for (int i = 0; i < NUM_LEDS; i++)
         {
-            colorsArray[i] = CRGB(CHSV(ledColor, 255, 255));
+            colorsArray[i] = CRGB::Black;
         }
+        clearLEDs = false;
     }
+    else if (!animate)
+        if (!animate)
+        {
+            for (int i = 0; i < NUM_LEDS; i++)
+            {
+                colorsArray[i] = CRGB(CHSV(ledColor, 255, 255));
+            }
+        }
     for (int i = 0; i < NUM_LEDS; i++)
     {
         leds[i] = colorsArray[i];
     }
 #else
-    for (int i = 0; i < NUM_LEDS; i++)
+    if (clearLEDs)
     {
-        leds[i] = CRGB(CHSV(ledColor, 255, 255));
+        clearLEDs = false;
+        for (int i = 0; i < NUM_LEDS; i++)
+        {
+            leds[i] = CRGB::Black;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < NUM_LEDS; i++)
+        {
+            leds[i] = CRGB(CHSV(ledColor, 255, 255));
+        }
     }
 #endif
     FastLED.show();
@@ -139,6 +158,25 @@ void animateLEDs()
 }
 #endif
 
+//
+// ------------------------------------------------------------ [  SLEED/WAKE  ] --------- 
+//
+
+void sleepLEDs()
+{
+    // clear LEDs so the entire strip turns black 
+    clearLEDLocalData();
+}
+void wakeLEDs()
+{
+    // wake LEDs so the strip is displayed again
+    updateLEDs();
+}
+
+//
+// ------------------------------------------------------------ [  SAVE/LOAD DATA  ] --------- 
+//
+
 void clearLEDLocalData()
 {
     // clear buffer + push to strip (fixes lingering bugs in data line)
@@ -146,9 +184,9 @@ void clearLEDLocalData()
     // FastLED.clear(true);
     // NOTE: FastLED.clear(true) seems to add add'l size to the build, causing it to fail.
     //       Even tho the below is functionally identical, this does NOT break the build.
-    // clearLEDs = true;
-    // updateLEDs();
-    // FastLED.clearData();
+    clearLEDs = true;
+    updateLEDs();
+    FastLED.clearData();
 }
 
 void loadLEDData()

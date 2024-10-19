@@ -39,6 +39,11 @@ void updateLEDs();
 void animateLEDs();
 #endif
 
+// call from sleep.h when device is put to sleep (to disable LED display)
+void sleepLEDs();
+// call from sleep.h when device wakes up (to re-enable LED display)
+void wakeLEDs();
+
 void clearLEDLocalData();
 void loadLEDData();
 void saveLEDData();
