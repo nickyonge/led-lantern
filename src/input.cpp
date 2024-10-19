@@ -77,12 +77,38 @@ void loopInput()
     // check for position change
     if (encPos != newPos)
     {
-        // position changed, read movement delta
-        int delta = encPos - newPos;
 
         // add acceleration or delta multiplier, as needed
 #ifdef USE_ENCODER_ACCELERATION
+#ifdef POLL_ENCODER_INTERRUPTS
+        unsigned long ms = encoder->getMillisBetweenRotations();
 #else
+        unsigned long ms = encoder.getMillisBetweenRotations();
+#endif
+        if (ms < longCutoff)
+        {
+            // do some acceleration using factors a and b
+            // limit to maximum acceleration
+            if (ms < shortCutoff)
+            {
+                ms = shortCutoff;
+            }
+            float ticksActual_float = a * ms + b;
+            long deltaTicks = (long)ticksActual_float * (newPos - encPos);
+            newPos = newPos + deltaTicks;
+            // update encorder position to newPos
+#ifdef POLL_ENCODER_INTERRUPTS
+            encoder->setPosition(newPos);
+#else
+            encoder.setPosition(newPos);
+#endif
+            // done accounting for ms cutoff, calc delta
+        }
+        // position changed, read movement delta
+        int delta = encPos - newPos; // encoder relative motion
+#else
+        // no acceleration, calc delta, check for multplier and proceed
+        int delta = encPos - newPos; // encoder relative motion
 #ifdef ENC_NONACCEL_MULTIPLIER
         delta *= ENC_NONACCEL_MULTIPLIER;
 #endif
@@ -90,6 +116,8 @@ void loopInput()
 
         // update LED colour by delta amount
         shiftLEDColor(delta);
+
+        // update stored encoder position
         encPos = newPos;
     }
 }

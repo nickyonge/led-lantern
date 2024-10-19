@@ -14,11 +14,28 @@
 #define POLL_ENCODER_LOOP         // poll the encoder during loopInput cycle
 #define USE_ENCODER_ACCELERATION  // should encoder speed be accelerated?
 
-#ifndef USE_ENCODER_ACCELERATION
-#define ENC_NONACCEL_MULTIPLIER 4
+#ifdef USE_ENCODER_ACCELERATION
+// accel per https://github.com/mathertel/RotaryEncoder/blob/master/examples/AcceleratedRotator/AcceleratedRotator.ino
+
+// the maximum acceleration is 10 times.
+constexpr float maxAccel = 5;// default 10
+// at 200ms or slower, there should be no acceleration. (factor 1)
+constexpr float longCutoff = 50;// default 50
+// at 5 ms, we want to have maximum acceleration (factor maxAccel)
+constexpr float shortCutoff = 5;// default 5
+
+// To derive the calc. constants, compute as follows:
+// On an x(ms) - y(factor) plane resolve a linear formular factor(ms) = a * ms + b;
+// where  f(4)=10 and f(200)=1
+
+constexpr float a = (maxAccel - 1) / (shortCutoff - longCutoff);// 0.2
+constexpr float b = 1 - (longCutoff * a);// -9
+
+#else
+#define ENC_NONACCEL_MULTIPLIER 4 // if defined, multiply encoder delta for LED shift by this 
 #endif
 
-#define ENC_LATCH_MODE RotaryEncoder::LatchMode::FOUR3
+#define ENC_LATCH_MODE RotaryEncoder::LatchMode::FOUR3 // latch mode to use for rotary encoder 
 
 void setupInput();
 void loopInput();
