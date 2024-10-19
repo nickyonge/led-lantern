@@ -17,5 +17,5 @@ void loop()
     loopSleep();
 
     // 1ms loop interval
-    delay(1);
+    delay(DELAY_INTERVAL);
 }

@@ -34,8 +34,9 @@ void loopLEDs()
         animTimer++;
         if (animTimer >= animInterval)
         {
-            // animate LEDs
+            // reset anim timer, and animate LEDs
             animTimer = 0;
+            animateLEDs();
         }
     }
 }

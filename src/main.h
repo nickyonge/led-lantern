@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#define DELAY_INTERVAL 1 // delay in ms per loop() cycle
+
 #include "leds.h"
 #include "input.h"
 #include "sleep.h"

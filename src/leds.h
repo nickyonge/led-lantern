@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
+#include "main.h"
 #include "pindef.h"
 #include "savedata.h"
 
@@ -13,9 +14,9 @@
 #define NUM_LEDS 12
 
 #define LED_BRIGHTNESS 120
-#define ANIM_FPS 30;
+#define ANIM_FPS 30
 
-constexpr int animInterval = 1000 / ANIM_FPS;
+constexpr int animInterval = (1000 / ANIM_FPS) / DELAY_INTERVAL;
 
 void setupLEDs();
 void loopLEDs();
