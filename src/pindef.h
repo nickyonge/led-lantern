@@ -7,8 +7,6 @@
 #define PIN_ENC_DAT 7
 #define PIN_ENC_SWITCH 8 // int0
 
-#endif
-
 /* PINOUT DIAGRAMS FOR ATTINYX4 / ATTINYX5
 
                                ATtinyX4
@@ -53,17 +51,10 @@ https://www.engbedded.com/fusecalc/
 
 */
 
-
 // Warnings to ensure ATtinyX4's Arduino pinmapping is defined correctly
-#ifdef __AVR_ATtinyX4__                            // ensure relevant platform
-#pragma GCC diagnostic push                        // to prevent "unknown pragma" IDE warning, we have to add an ignore rule to GCC diagnostic
-#pragma GCC diagnostic ignored "-Wunknown-pragmas" // disable "unknown pragma" to allow for #region style code-folding
-
-#pragma region ATTINYX4_PINMAPPING_DEFINITION
-// --- pinmapping definition check start ---
+#ifdef __AVR_ATtinyX4__ // ensure ATtinyX4 platform, proceed with warning checks
 
 // SETUP: Uncomment ONE of the two definitions below to select the desired pinmapping:
-
 #define USE_CW_PINMAPPING // this project uses CLOCKWISE (CW) pinmapping
 // #define USE_CCW_PINMAPPING // this project uses COUNTERCLOCKWISE (CCW) pinmapping
 
@@ -93,9 +84,6 @@ https://www.engbedded.com/fusecalc/
 #endif
 #endif
 // for more info see: https://github.com/SpenceKonde/ATTinyCore/blob/77ae92aafb2294f9838c3e15575c2b5477066439/avr/extras/ATtiny_x4.md#pin-mapping-options
-// --- pinmapping definition check end ---
-#pragma endregion
+#endif // --- end pinmapping warnings
 
-#pragma GCC diagnostic pop // re-enable unknown pragma errors
-#endif
-// end pinmapping warnings
+#endif // PINDEF_H
