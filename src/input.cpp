@@ -22,7 +22,7 @@ void setupInput()
     // enable interrupt on enc switch pin
     enableInterrupt(PIN_ENC_SWITCH, interruptSwitch, FALLING);
     // check for encoder data interrupts
-#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENCODER_ROTATION_WAKES_FROM_SLEEP)
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
     enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
     enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);
 #endif
@@ -33,7 +33,7 @@ void interruptSwitch()
     lastInterrupted = true;
 }
 
-#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENCODER_ROTATION_WAKES_FROM_SLEEP)
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
 void interruptEncoder()
 {
 #ifdef POLL_ENCODER_INTERRUPTS
@@ -75,8 +75,16 @@ void loopInput()
     {
         // position changed, read movement delta
         int delta = encPos - newPos;
-        // update LED colour by delta amount
 
+        // add acceleration or delta multiplier, as needed
+#ifdef USE_ENCODER_ACCELERATION
+#else
+#ifdef ENC_NONACCEL_MULTIPLIER
+        delta *= ENC_NONACCEL_MULTIPLIER;
+#endif
+#endif
+
+        // update LED colour by delta amount
         shiftLEDColor(delta);
         encPos = newPos;
     }
@@ -84,7 +92,7 @@ void loopInput()
 
 void sleepInput()
 {
-#ifndef ENCODER_ROTATION_WAKES_FROM_SLEEP
+#ifndef ENC_ROTATION_WAKES_DEVICE
 #ifdef POLL_ENCODER_INTERRUPTS
     disableInterrupt(PIN_ENC_DAT);
     disableInterrupt(PIN_ENC_CLK);
@@ -93,7 +101,7 @@ void sleepInput()
 }
 void wakeInput()
 {
-#ifndef ENCODER_ROTATION_WAKES_FROM_SLEEP
+#ifndef ENC_ROTATION_WAKES_DEVICE
 #ifdef POLL_ENCODER_INTERRUPTS
     enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
     enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);

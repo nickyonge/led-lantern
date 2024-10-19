@@ -8,10 +8,15 @@
 #include "pindef.h"
 #include "leds.h"
 
-#define USE_ENCODER_SWITCH_LOGIC          // use in-loop logic for encoder switch, beyond just interrupt
-#define ENCODER_ROTATION_WAKES_FROM_SLEEP // rotating the encoder will wake the device. otherwise, it must be clicked
-#define POLL_ENCODER_INTERRUPTS           // poll the encoder during clk/data pin interrupts
-#define POLL_ENCODER_LOOP                 // poll the encoder during loopInput cycle
+#define USE_ENCODER_SWITCH_LOGIC  // use in-loop logic for encoder switch, beyond just interrupt
+#define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
+#define POLL_ENCODER_INTERRUPTS   // poll the encoder during clk/data pin interrupts
+#define POLL_ENCODER_LOOP         // poll the encoder during loopInput cycle
+#define USE_ENCODER_ACCELERATION  // should encoder speed be accelerated?
+
+#ifndef USE_ENCODER_ACCELERATION
+#define ENC_NONACCEL_MULTIPLIER 4
+#endif
 
 #define ENC_LATCH_MODE RotaryEncoder::LatchMode::FOUR3
 
@@ -20,7 +25,7 @@ void loopInput();
 
 // callback for enc switch pin interrupt
 void interruptSwitch();
-#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENCODER_ROTATION_WAKES_FROM_SLEEP)
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
 // callback for enc data pins interrupt (see )
 void interruptEncoder();
 #endif
