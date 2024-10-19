@@ -1,5 +1,7 @@
 #include "sleep.h"
 
+static uint16_t seconds_idle = 0;
+
 void setupSleep()
 {
     // prep correct sleep mode
@@ -7,13 +9,18 @@ void setupSleep()
     // info on sleep modes: https://onlinedocs.microchip.com/oxy/GUID-A834D554-5741-41A3-B5E1-35ED7CD8250A-en-US-5/GUID-35CAFA19-CA93-4B3E-AEE3-481B8542FE94.html
 }
 
-void loopSleep() {
-    
+void loopSleep()
+{
+}
+
+void resetSleepTimer()
+{
 }
 
 void goToSleep()
 {
     sleepInput();        // put input system to sleep
+    sleepLEDs();         // put LED display to sleep
     sleep_enable();      // enable sleep bit
     sleep_bod_disable(); // disable brownout detection
     sei();               // ensure interrupts are active
@@ -24,4 +31,5 @@ void goToSleep()
     sleep_disable(); // disable sleep bit
     sei();           // re-enable interrupts again (failsafe)
     wakeInput();     // wake up input system
+    wakeLEDs();      // wake up LED display
 }
