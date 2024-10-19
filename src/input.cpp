@@ -56,12 +56,13 @@ void loopInput()
 
 // read rotary encoder switch
 #ifdef USE_ENCODER_SWITCH_LOGIC
-    bool lastSwitch = encSwitch;
+    bool lastSwitch = encSwitch;              // preserve last switch state
     encSwitch = !digitalRead(PIN_ENC_SWITCH); // NC switch, invert
     if (lastSwitch != encSwitch)
     {
         // switch state toggled, do stuff...
-        inputProcessed = true;
+        inputProcessed = true; // confirm input processed
+        jumpLEDColor();        // jump LED colour to opposite end of spectrum
     }
 #endif
 

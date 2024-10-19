@@ -32,8 +32,13 @@ constexpr int animInterval = (1000 / ANIM_FPS) / DELAY_INTERVAL;
 void setupLEDs();
 void loopLEDs();
 
-void shiftLEDColor(int delta); // shift the current LED colour by the given amount
+// shift the current LED colour by the given amount (HSV hue, 0-255)
+void shiftLEDColor(int delta);
+// convenience function to shift LED colour by 128 (opposite end of the spectrum from current)
+void jumpLEDColor();
+// output the current colour information to FastLED
 void updateLEDs();
+
 #ifndef DISABLE_ANIMATION
 // LED animation sourced from FastLED's Fire2012
 void animateLEDs();
@@ -44,8 +49,11 @@ void sleepLEDs();
 // call from sleep.h when device wakes up (to re-enable LED display)
 void wakeLEDs();
 
+// clear current LED display and data (sets all LEDs to black, clears buffer)
 void clearLEDLocalData();
+// load LED colour data from EEPROM
 void loadLEDData();
+// save LED colour data to EEPROM
 void saveLEDData();
 
 #endif // LEDS_H

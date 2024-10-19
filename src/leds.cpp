@@ -15,7 +15,7 @@ int animTimer = 0;
 #endif
 
 //
-// ------------------------------------------------------------ [  SETUP AND LOOP  ] --------- 
+// ------------------------------------------------------------ [  SETUP AND LOOP  ] ---------
 //
 
 void setupLEDs()
@@ -53,7 +53,7 @@ void loopLEDs()
 }
 
 //
-// ------------------------------------------------------------ [  LED DISPLAY LOGIC  ] --------- 
+// ------------------------------------------------------------ [  LED DISPLAY LOGIC  ] ---------
 //
 
 void updateLEDs()
@@ -114,6 +114,11 @@ void shiftLEDColor(int delta)
     saveLEDData();
 }
 
+void jumpLEDColor()
+{
+    shiftLEDColor(128);
+}
+
 #ifndef DISABLE_ANIMATION
 void animateLEDs()
 {
@@ -159,12 +164,12 @@ void animateLEDs()
 #endif
 
 //
-// ------------------------------------------------------------ [  SLEED/WAKE  ] --------- 
+// ------------------------------------------------------------ [  SLEED/WAKE  ] ---------
 //
 
 void sleepLEDs()
 {
-    // clear LEDs so the entire strip turns black 
+    // clear LEDs so the entire strip turns black
     clearLEDLocalData();
 }
 void wakeLEDs()
@@ -174,7 +179,7 @@ void wakeLEDs()
 }
 
 //
-// ------------------------------------------------------------ [  SAVE/LOAD DATA  ] --------- 
+// ------------------------------------------------------------ [  SAVE/LOAD DATA  ] ---------
 //
 
 void clearLEDLocalData()
