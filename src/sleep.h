@@ -4,6 +4,8 @@
 #include <Arduino.h>
 #include <avr/sleep.h>
 
+#include "input.h"
+
 void setupSleep();
 
 void goToSleep(); // puts device to sleep, until any interrupt is received

@@ -25,6 +25,11 @@ void interruptSwitch();
 void interruptEncoder();
 #endif
 
+// call from sleep.h when device is put to sleep (to disable input interrupts)
+void sleepInput();
+// call from sleep.h when device wakes up (to re-enable input interrupts)
+void wakeInput();
+
 // error check for no encoder polling
 #if !defined(POLL_ENCODER_INTERRUPTS) && !defined(POLL_ENCODER_LOOP)
 #error "Neither POLL_ENCODER_INTERRUPTS nor POLL_ENCODER_LOOP are defnied - at least ONE should be active!"

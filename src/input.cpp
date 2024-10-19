@@ -81,3 +81,22 @@ void loopInput()
         encPos = newPos;
     }
 }
+
+void sleepInput()
+{
+#ifndef ENCODER_ROTATION_WAKES_FROM_SLEEP
+#ifdef POLL_ENCODER_INTERRUPTS
+    disableInterrupt(PIN_ENC_DAT);
+    disableInterrupt(PIN_ENC_CLK);
+#endif
+#endif
+}
+void wakeInput()
+{
+#ifndef ENCODER_ROTATION_WAKES_FROM_SLEEP
+#ifdef POLL_ENCODER_INTERRUPTS
+    enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
+    enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);
+#endif
+#endif
+}
