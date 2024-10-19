@@ -1,7 +1,7 @@
 #include "input.h"
 #include <EnableInterrupt.h>
 
-static volatile int encPos = 0;        // current position of rotary encoder
+static int encPos = 0;        // current position of rotary encoder
 static bool encSwitch = false;         // is rotary encoder switch currently pressed?
 volatile bool lastInterrupted = false; // was interrupt called before last loop cylce?
 
