@@ -63,10 +63,14 @@ void loopInput()
 
     // update and read rotary encoder movement
 #ifdef POLL_ENCODER_INTERRUPTS
-    // encoder->tick();
+#ifdef POLL_ENCODER_LOOP
+    encoder->tick();
+#endif
     int newPos = encoder->getPosition();
 #else
-    // encoder.tick();
+#ifdef POLL_ENCODER_LOOP
+    encoder.tick();
+#endif
     int newPos = encoder.getPosition();
 #endif
 
