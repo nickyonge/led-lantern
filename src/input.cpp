@@ -1,6 +1,10 @@
 #include "input.h"
 #include <EnableInterrupt.h>
 
+static int encPos = 0;                 // current position of rotary encoder
+static bool encSwitch = false;         // is rotary encoder switch currently pressed?
+volatile bool lastInterrupted = false; // was interrupt called before last loop cylce?
+
 RotaryEncoder encoder(PIN_ENC_CLK, PIN_ENC_DAT, RotaryEncoder::LatchMode::FOUR3);
 
 void setupInput()
