@@ -1,6 +1,10 @@
 #include "sleep.h"
 
-static uint16_t seconds_idle = 0;
+#ifdef USE_SLEEP_TIMER
+
+byte seconds_idle = 0;
+byte minutes_idle = 0;
+#endif
 
 void setupSleep()
 {
@@ -11,10 +15,15 @@ void setupSleep()
 
 void loopSleep()
 {
+#ifdef USE_SLEEP_TIMER
+    secondInterval;
+#endif
 }
 
 void resetSleepTimer()
 {
+#ifdef USE_SLEEP_TIMER
+#endif
 }
 
 void goToSleep()

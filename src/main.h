@@ -4,6 +4,8 @@
 #include <Arduino.h>
 
 #define DELAY_INTERVAL 1 // delay in ms per loop() cycle
+// NOTE: DELAY_INTERVAL value should be such that 1000/DELAY_INTERVAL results in a whole number.
+//       Otherwise, sleep timer timing will be off.
 
 #include "leds.h"
 #include "input.h"

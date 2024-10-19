@@ -44,12 +44,14 @@ void interruptEncoder()
 
 void loopInput()
 {
+    bool inputProcessed = false; // was any input, or result of an input, or interrupt, processed this cycle?
+
     // check for interrupt since previous cycle
     if (lastInterrupted)
     {
         // yup, interrupt detected
         lastInterrupted = false;
-        resetSleepTimer();
+        inputProcessed = true;
     }
 
 // read rotary encoder switch
@@ -59,7 +61,7 @@ void loopInput()
     if (lastSwitch != encSwitch)
     {
         // switch state toggled, do stuff...
-        resetSleepTimer();
+        inputProcessed = true;
     }
 #endif
 
@@ -119,11 +121,17 @@ void loopInput()
         // update LED colour by delta amount
         shiftLEDColor(delta);
 
-        // reset sleep timer
-        resetSleepTimer();
+        // confirm input processed
+        inputProcessed = true;
 
         // update stored encoder position
         encPos = newPos;
+    }
+
+    if (inputProcessed)
+    {
+        // reset sleep timer
+        resetSleepTimer();
     }
 }
 

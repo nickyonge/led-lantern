@@ -7,11 +7,17 @@
 #include "main.h"
 #include "input.h"
 
+#define USE_SLEEP_TIMER
+
+#ifdef USE_SLEEP_TIMER
+
 // one second, taking DELAY_INTERVAL into account
 constexpr int secondInterval = 1000 / DELAY_INTERVAL;
 
 #define SECONDS_UNTIL_SLEEP 5
 #define MINUTES_UNTIL_SLEEP 0
+
+#endif // USE_SLEEP_TIMER
 
 void setupSleep();
 void loopSleep();
