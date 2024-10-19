@@ -12,9 +12,9 @@ void setup()
 void loop()
 {
     loopInput();
+    loopLEDs();
     loopSaveData();
     loopSleep();
-    
 
     // 1ms loop interval
     delay(1);

@@ -1,10 +1,13 @@
 #include "leds.h"
 
-CRGB leds[NUM_LEDS];
+static bool savedLEDsThisSession = false; // on first save, ensure LEDs are updated correctly only once
 
+CRGB leds[NUM_LEDS];
 static int ledColor = DATA_DEFAULT_LED_HUE; // current LED HSV hue
 
-static bool savedLEDsThisSession = false; // on first save, ensure LEDs are updated correctly only once
+bool animate = true;
+bool reverseAnimDirection = false;
+int animTimer = 0;
 
 void setupLEDs()
 {
@@ -22,6 +25,30 @@ void setupLEDs()
     updateLEDs();
 }
 
+void loopLEDs()
+{
+    // run animation
+    if (animate)
+    {
+        // check timer
+        animTimer++;
+        if (animTimer >= animInterval)
+        {
+            // animate LEDs
+            animTimer = 0;
+        }
+    }
+}
+
+void updateLEDs()
+{
+    for (int i = 0; i < NUM_LEDS; i++)
+    {
+        leds[i] = CRGB(CHSV(ledColor, 255, 255));
+    }
+    FastLED.show();
+}
+
 void shiftLEDColor(int delta)
 {
     ledColor += delta;
@@ -37,13 +64,8 @@ void shiftLEDColor(int delta)
     saveLEDData();
 }
 
-void updateLEDs()
+void animateLEDs()
 {
-    for (int i = 0; i < NUM_LEDS; i++)
-    {
-        leds[i] = CRGB(CHSV(ledColor, 255, 255));
-    }
-    FastLED.show();
 }
 
 void clearLEDLocalData()
