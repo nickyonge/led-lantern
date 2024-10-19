@@ -3,9 +3,9 @@
 void setup()
 {
     // call class-specific setup functions
-    setupLEDs();
-    setupInput();
     setupSleep();
+    setupInput();
+    setupLEDs();// setup LEDs last (after Input)
 }
 
 void loop()
