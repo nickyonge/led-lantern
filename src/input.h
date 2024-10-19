@@ -6,6 +6,7 @@
 #include <RotaryEncoder.h>
 
 #include "pindef.h"
+#include "sleep.h"
 #include "leds.h"
 
 #define USE_ENCODER_SWITCH_LOGIC  // use in-loop logic for encoder switch, beyond just interrupt

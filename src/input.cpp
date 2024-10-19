@@ -1,7 +1,7 @@
 #include "input.h"
 #include <EnableInterrupt.h>
 
-static int encPos = 0;        // current position of rotary encoder
+static int encPos = 0;                 // current position of rotary encoder
 static bool encSwitch = false;         // is rotary encoder switch currently pressed?
 volatile bool lastInterrupted = false; // was interrupt called before last loop cylce?
 
@@ -49,6 +49,7 @@ void loopInput()
     {
         // yup, interrupt detected
         lastInterrupted = false;
+        resetSleepTimer();
     }
 
 // read rotary encoder switch
@@ -58,6 +59,7 @@ void loopInput()
     if (lastSwitch != encSwitch)
     {
         // switch state toggled, do stuff...
+        resetSleepTimer();
     }
 #endif
 
@@ -116,6 +118,9 @@ void loopInput()
 
         // update LED colour by delta amount
         shiftLEDColor(delta);
+
+        // reset sleep timer
+        resetSleepTimer();
 
         // update stored encoder position
         encPos = newPos;
