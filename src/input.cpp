@@ -199,7 +199,7 @@ void loopInput()
     {
 
         // add acceleration or delta multiplier, as needed
-#ifdef USE_ENCODER_ACCELERATION
+#ifdef ENC_ROTATION_ACCELERATION
 #ifdef POLL_ENCODER_INTERRUPTS
         unsigned long ms = encoder->getMillisBetweenRotations();
 #else

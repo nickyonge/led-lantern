@@ -9,22 +9,19 @@
 #include "sleep.h"
 #include "leds.h"
 
-#define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
-#define POLL_ENCODER_INTERRUPTS   // poll the encoder during clk/data pin interrupts
-#define POLL_ENCODER_LOOP         // poll the encoder during loopInput cycle
-#define USE_ENCODER_ACCELERATION  // should encoder speed be accelerated?
+// #define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
+#define POLL_ENCODER_INTERRUPTS   // poll the encoder rotation during clk/data pin interrupts
+#define POLL_ENCODER_LOOP         // poll the encoder rotation during loopInput cycle
+#define ENC_ROTATION_ACCELERATION // should encoder speed be accelerated?
 
 #define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt
 #ifdef USE_ENCODER_SWITCH_LOGIC
 #define ENCODER_SWITCH_INPUT_BUFFER 10 // time in ms to buffer any input received on the encoder switch
 #define ENCODER_SWITCH_LOGIC_POLL      // process encoder switch logic by reading pins in loopInput()
 #define ENCODER_SWITCH_LOGIC_INTERRUPT // process encoder switch logic by waiting for an interrupt on the switch pin
-#if defined(USE_ENCODER_SWITCH_LOGIC) && defined(ENCODER_SWITCH_LOGIC_POLL) && defined(ENCODER_SWITCH_LOGIC_INTERRUPT)
-#define ENCODER_SHARED_LOGIC_TIMEOUT 30 // time in ms to wait for both switch interrupt and pin poll to match, once one is triggered, before dismissing the input
-#endif
 #endif
 
-#ifdef USE_ENCODER_ACCELERATION
+#ifdef ENC_ROTATION_ACCELERATION
 // accel per https://github.com/mathertel/RotaryEncoder/blob/master/examples/AcceleratedRotator/AcceleratedRotator.ino
 
 // the maximum acceleration is 10 times.
