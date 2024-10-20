@@ -1,8 +1,7 @@
 #include "input.h"
 #include <EnableInterrupt.h>
 
-static int encPos = 0;         // current position of rotary encoder
-static bool encSwitch = false; // is rotary encoder switch currently pressed?
+static int encPos = 0; // current position of rotary encoder
 
 volatile bool interruptedBySwitch = false;  // was interrupt via enc switch called before last loop cylce?
 volatile bool interruptedByEncoder = false; // was interrupt via encoder rotation called before last loop cycle?
@@ -11,6 +10,18 @@ volatile bool interruptedByEncoder = false; // was interrupt via encoder rotatio
 RotaryEncoder *encoder = nullptr;
 #else
 RotaryEncoder encoder(PIN_ENC_CLK, PIN_ENC_DAT, ENC_LATCH_MODE);
+#endif
+
+#ifdef USE_ENCODER_SWITCH_LOGIC
+bool encSwitchInputProcessed = false; // was an input processed by all valid sources? flag to prevent multiple firings per input
+#ifdef ENCODER_SWITCH_LOGIC_POLL
+bool encSwitchPoll = false;  // is rotary encoder switch currently pressed, as determined by pin polling?
+int encSwitchPollBuffer = 0; // raw buffer for reading enc switch over several frames following a valid pin poll
+#endif
+#ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
+bool encSwitchInterrupt = false;  // is rotary encoder switch currently pressed, as determined by pin interrupt?
+int encSwitchInterruptBuffer = 0; // raw buffer for reading enc switch for several frames following an interrupt
+#endif
 #endif
 
 void setupInput()
@@ -59,43 +70,94 @@ void loopInput()
 
 // read rotary encoder switch
 #ifdef USE_ENCODER_SWITCH_LOGIC
+    bool switchInputReceived = false; // did we fully detect a switch input received by all relevant sources?
+#ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
+    // read switch interrupt buffer (read it up here because it gets referenced in multiple places below)
+    if (interruptedBySwitch)
+    {
+        encSwitchInterruptBuffer = ENCODER_SWITCH_INPUT_BUFFER;
+    }
+    encSwitchInterrupt = encSwitchInterruptBuffer > 0;
+#endif
 #ifdef ENCODER_SWITCH_LOGIC_POLL
-    bool lastSwitch = encSwitch;              // preserve last switch state
-    encSwitch = !digitalRead(PIN_ENC_SWITCH); // NC switch, invert
-    if (lastSwitch != encSwitch)
+    bool lastSwitchPoll = encSwitchPoll; // preserve last switch state
+    if (!digitalRead(PIN_ENC_SWITCH))    // NC switch, invert
+    {
+        encSwitchPollBuffer = ENCODER_SWITCH_INPUT_BUFFER;
+    }
+    encSwitchPoll = encSwitchPollBuffer > 0;
+    if (lastSwitchPoll != encSwitchPoll)
     {
         // switch state toggled, do stuff...
         inputProcessed = true; // confirm input processed
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
         // both poll and interrupt are defined
     }
-    if (interruptedBySwitch && encSwitch)
+    if (encSwitchInterrupt && encSwitchPoll)
     {
-        // both interrupted, AND encSwitch is held
-            jumpLEDColor();
+        // both interrupted, AND encSwitchPoll is held
+        switchInputReceived = true;
     }
+    // end combined INTERRUPT + POLL logic
 #else
         // poll logic only, no switch interrupt
-        if (encSwitch)
+        if (encSwitchPoll)
         {
-            // if switch is pressed, jump LED colour to opposite end of spectrum
-            jumpLEDColor();
+            // if switch is pressed, confirm we've received input
+            switchInputReceived = true;
         }
-    }
+    } // end ENCODER_SWITCH_LOGIC_POLL only
 #endif
-#else
+#else // end ENCODER_SWITCH_LOGIC_POLL (and combined POLL + INTERRUPT logic)
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
     // interrupt logic only, no switch pin polling
-    if (interruptedBySwitch)
+    if (encSwitchInterrupt)
     {
         inputProcessed = true; // confirm input processed
         jumpLEDColor();
     }
 #else
-    // neither switch interrupt nor pin polling logic defined, at least one should be selected, otherwise undefine USE_ENCODER_SWITCH_LOGIC
+#error "neither switch interrupt nor pin polling logic defined, can't read switch input, at least one should be defined, otherwise undefine USE_ENCODER_SWITCH_LOGIC"
 #endif
 #endif
+    // check to see if we're waiting for an input to process, or if we've already received one and are waiting for buffers to clear
+    if (!encSwitchInputProcessed)
+    {
+        // input has NOT YET been processed, check if valid switch input received
+        if (switchInputReceived)
+        {
+            // jump LED colour to opposite end of spectrum
+            jumpLEDColor();
+            // confirm we've processed the input
+            encSwitchInputProcessed = true;
+        }
+    }
+    else
+    {
+// input HAS been processed, check to see if the buffers are clear and we can reset the input
+#if defined(ENCODER_SWITCH_LOGIC_POLL) && defined(ENCODER_SWITCH_LOGIC_INTERRUPT)
+        // both poll and interrupt defined
+        if (!switchInputReceived && !encSwitchInterrupt && !encSwitchPoll)
+        {
+            encSwitchInputProcessed = false; // all inputs and buffers cleared, reset input process
+        }
+#elif defined(ENCODER_SWITCH_LOGIC_POLL)
+        // poll only
+        if (!switchInputReceived && !encSwitchPoll)
+        {
+            encSwitchInputProcessed = false; // all inputs and buffers cleared, reset input process
+        }
+#elif defined(ENCODER_SWITCH_LOGIC_INTERRUPT)
+        // interrupt only
+        if (!switchInputReceived && !encSwitchInterrupt)
+        {
+            encSwitchInputProcessed = false; // all inputs and buffers cleared, reset input process
+        }
+#else
+#error "neither switch interrupt nor pin polling logic defined, can't reset input processed, at least one should be defined, otherwise undefine USE_ENCODER_SWITCH_LOGIC"
 #endif
+    }
+#endif // end USE_ENCODER_SWITCH_LOGIC
 
     // update and read rotary encoder movement
 #ifdef POLL_ENCODER_INTERRUPTS
