@@ -33,7 +33,7 @@ void setupInput()
     // encoder switch pin
     pinMode(PIN_ENC_SWITCH, INPUT_PULLUP);
     // enable interrupt on enc switch pin
-    enableInterrupt(PIN_ENC_SWITCH, interruptSwitch, FALLING);
+    enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING);
     // check for encoder data interrupts
 #if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
     enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
