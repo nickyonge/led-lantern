@@ -66,6 +66,16 @@ void loopInput()
     {
         // switch state toggled, do stuff...
         inputProcessed = true; // confirm input processed
+#ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
+        // both poll and interrupt are defined
+    }
+    if (interruptedBySwitch && encSwitch)
+    {
+        // both interrupted, AND encSwitch is held
+            jumpLEDColor();
+    }
+#else
+        // poll logic only, no switch interrupt
         if (encSwitch)
         {
             // if switch is pressed, jump LED colour to opposite end of spectrum
@@ -73,12 +83,17 @@ void loopInput()
         }
     }
 #endif
+#else
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
+    // interrupt logic only, no switch pin polling
     if (interruptedBySwitch)
     {
         inputProcessed = true; // confirm input processed
         jumpLEDColor();
     }
+#else
+    // neither switch interrupt nor pin polling logic defined, at least one should be selected, otherwise undefine USE_ENCODER_SWITCH_LOGIC
+#endif
 #endif
 #endif
 

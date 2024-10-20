@@ -16,9 +16,9 @@
 
 #define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt
 #ifdef USE_ENCODER_SWITCH_LOGIC
-// #define ENCODER_SWITCH_LOGIC_POLL      // process encoder switch logic by reading pins in loopInput()
+#define ENCODER_SWITCH_LOGIC_POLL      // process encoder switch logic by reading pins in loopInput()
 #define ENCODER_SWITCH_LOGIC_INTERRUPT // process encoder switch logic by waiting for an interrupt on the switch pin
-#endif                                 // note: defining both POLL and INTERRUPT can result in the signal sending multiple times
+#endif
 
 #ifdef USE_ENCODER_ACCELERATION
 // accel per https://github.com/mathertel/RotaryEncoder/blob/master/examples/AcceleratedRotator/AcceleratedRotator.ino
