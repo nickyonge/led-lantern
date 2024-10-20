@@ -13,11 +13,11 @@
 // one second, taking main.h DELAY_INTERVAL into account
 constexpr int secondInterval = 1000 / DELAY_INTERVAL;
 
-#define SECONDS_MAX 60 // 60s = 1 minute (it'd be bonkers to change this, but hey, maybe you just hate counting in Base60?)
-#define MINUTES_MAX 240// 240mins = 4 hours (prevent byte overflow at 255)
+#define SECONDS_MAX 60  // 60s = 1 minute (it'd be bonkers to change this, but hey, maybe you just hate counting in Base60?)
+#define MINUTES_MAX 240 // 240mins = 4 hours (prevent byte overflow at 255)
 
-#define MINUTES_UNTIL_SLEEP 0 // how many minutes (plus given seconds) until device goes to sleep?
-#define SECONDS_UNTIL_SLEEP 5 // how many seconds (after minutes target is reached) until device goes to sleep?
+#define MINUTES_UNTIL_SLEEP 2  // how many minutes (plus given seconds) until device goes to sleep?
+#define SECONDS_UNTIL_SLEEP 30 // how many seconds (after minutes target is reached) until device goes to sleep?
 
 #endif // USE_SLEEP_TIMER
 

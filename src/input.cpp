@@ -1,9 +1,11 @@
 #include "input.h"
 #include <EnableInterrupt.h>
 
-static int encPos = 0;                 // current position of rotary encoder
-static bool encSwitch = false;         // is rotary encoder switch currently pressed?
-volatile bool lastInterrupted = false; // was interrupt called before last loop cylce?
+static int encPos = 0;         // current position of rotary encoder
+static bool encSwitch = false; // is rotary encoder switch currently pressed?
+
+volatile bool interruptedBySwitch = false;  // was interrupt via enc switch called before last loop cylce?
+volatile bool interruptedByEncoder = false; // was interrupt via encoder rotation called before last loop cycle?
 
 #ifdef POLL_ENCODER_INTERRUPTS
 RotaryEncoder *encoder = nullptr;
@@ -30,12 +32,13 @@ void setupInput()
 
 void interruptSwitch()
 {
-    lastInterrupted = true;
+    interruptedBySwitch = true;
 }
 
 #if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
 void interruptEncoder()
 {
+    interruptedByEncoder = true;
 #ifdef POLL_ENCODER_INTERRUPTS
     encoder->tick();
 #endif
@@ -45,25 +48,38 @@ void interruptEncoder()
 void loopInput()
 {
     bool inputProcessed = false; // was any input, or result of an input, or interrupt, processed this cycle?
+    bool lastInterrupted = interruptedBySwitch || interruptedByEncoder;
 
     // check for interrupt since previous cycle
     if (lastInterrupted)
     {
         // yup, interrupt detected
-        lastInterrupted = false;
         inputProcessed = true;
     }
 
 // read rotary encoder switch
 #ifdef USE_ENCODER_SWITCH_LOGIC
+#ifdef ENCODER_SWITCH_LOGIC_POLL
     bool lastSwitch = encSwitch;              // preserve last switch state
     encSwitch = !digitalRead(PIN_ENC_SWITCH); // NC switch, invert
     if (lastSwitch != encSwitch)
     {
         // switch state toggled, do stuff...
         inputProcessed = true; // confirm input processed
-        jumpLEDColor();        // jump LED colour to opposite end of spectrum
+        if (encSwitch)
+        {
+            // if switch is pressed, jump LED colour to opposite end of spectrum
+            jumpLEDColor();
+        }
     }
+#endif
+#ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
+    if (interruptedBySwitch)
+    {
+        inputProcessed = true; // confirm input processed
+        jumpLEDColor();
+    }
+#endif
 #endif
 
     // update and read rotary encoder movement
@@ -134,6 +150,20 @@ void loopInput()
         // reset sleep timer
         resetSleepTimer();
     }
+
+    // reset interrupted state
+    if (lastInterrupted)
+    {
+        interruptedBySwitch = false;
+        interruptedByEncoder = false;
+    }
+}
+
+void inputSwitch()
+{
+}
+void inputEncoder()
+{
 }
 
 void sleepInput()
