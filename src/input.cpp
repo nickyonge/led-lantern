@@ -155,8 +155,30 @@ void loopInput()
         }
 #else
 #error "neither switch interrupt nor pin polling logic defined, can't reset input processed, at least one should be defined, otherwise undefine USE_ENCODER_SWITCH_LOGIC"
-#endif
+#endif // end resetting enc switch input processing
     }
+    // lastly, decrement input buffers
+#ifdef ENCODER_SWITCH_LOGIC_POLL
+    if (encSwitchPollBuffer > 0)
+    {
+        encSwitchPollBuffer -= DELAY_INTERVAL;
+        if (encSwitchPollBuffer < 0)
+        {
+            encSwitchPollBuffer = 0;
+        }
+    }
+#endif
+#ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
+    if (encSwitchInterruptBuffer > 0)
+    {
+        encSwitchInterruptBuffer -= DELAY_INTERVAL;
+        if (encSwitchInterruptBuffer < 0)
+        {
+            encSwitchInterruptBuffer = 0;
+        }
+    }
+#endif
+
 #endif // end USE_ENCODER_SWITCH_LOGIC
 
     // update and read rotary encoder movement
