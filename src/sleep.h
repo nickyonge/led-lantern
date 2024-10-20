@@ -10,9 +10,6 @@
 
 #ifdef USE_SLEEP_TIMER
 
-// one second, taking main.h DELAY_INTERVAL into account
-constexpr int secondInterval = 1000 / DELAY_INTERVAL;
-
 #define SECONDS_MAX 60  // 60s = 1 minute (it'd be bonkers to change this, but hey, maybe you just hate counting in Base60?)
 #define MINUTES_MAX 240 // 240mins = 4 hours (prevent byte overflow at 255)
 

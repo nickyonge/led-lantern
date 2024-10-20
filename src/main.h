@@ -7,6 +7,9 @@
 // NOTE: DELAY_INTERVAL value should be such that 1000/DELAY_INTERVAL results in a whole number.
 //       Otherwise, sleep timer timing will be off.
 
+// One second in num of cycle ticks, taking DELAY_INTERVAL into account
+constexpr int secondInterval = 1000 / DELAY_INTERVAL;
+
 #include "leds.h"
 #include "input.h"
 #include "sleep.h"

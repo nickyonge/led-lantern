@@ -44,7 +44,10 @@ void loopSaveData()
     // decrement save delay
     if (saveDelay > 0)
     {
-        saveDelay--;
+        saveDelay -= DELAY_INTERVAL;
+        if (saveDelay < 0) {
+            saveDelay = 0;
+        }
         return;
     }
 
