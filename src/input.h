@@ -9,6 +9,7 @@
 #include "sleep.h"
 #include "leds.h"
 
+#define ENC_SWITCH_WAKES_DEVICE // clicking the encoder switch will wake the device
 // #define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
 #define POLL_ENCODER_INTERRUPTS   // poll the encoder rotation during clk/data pin interrupts
 #define POLL_ENCODER_LOOP         // poll the encoder rotation during loopInput cycle
@@ -16,9 +17,11 @@
 
 #define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt
 #ifdef USE_ENCODER_SWITCH_LOGIC
-#define ENCODER_SWITCH_INPUT_BUFFER 10 // time in ms to buffer any input received on the encoder switch
-#define ENCODER_SWITCH_LOGIC_POLL      // process encoder switch logic by reading pins in loopInput()
-#define ENCODER_SWITCH_LOGIC_INTERRUPT // process encoder switch logic by waiting for an interrupt on the switch pin
+#define ENCODER_SWITCH_WAKE_INPUT_DELAY 10 // time in ms to delay reading switch input upon waking
+#define ENCODER_SWITCH_INPUT_BUFFER 10     // time in ms to buffer any input received on the encoder switch
+#define ENCODER_SWITCH_LOGIC_POLL          // process encoder switch logic by reading pins in loopInput()
+#define ENCODER_SWITCH_LOGIC_INTERRUPT     // process encoder switch logic by waiting for an interrupt on the switch pin
+#define ENCODER_SWITCH_JUMPS_LEDS   // switch input causes LEDs to jump halfway across the colour spectrum 
 #endif
 
 #ifdef ENC_ROTATION_ACCELERATION
@@ -69,6 +72,10 @@ void wakeInput();
 // error check for invalid switch logic
 #if defined(USE_ENCODER_SWITCH_LOGIC) && !defined(ENCODER_SWITCH_LOGIC_POLL) && !defined(ENCODER_SWITCH_LOGIC_INTERRUPT)
 #error "USE_ENCODER_SWITCH_LOGIC is defined, but logic is processed neither by polling pins nor reading interrupt. Disable switch logic, or define a logic source"
+#endif
+// error check for impossible to wake device
+#if !defined(ENC_SWITCH_WAKES_DEVICE) && !defined(ENC_ROTATION_WAKES_DEVICE)
+#error "Uh-oh, neither clicking nor rotating the encoder will wake the device. It's gonna sleep forever! One must be defined"
 #endif
 
 #endif // INPUT_H

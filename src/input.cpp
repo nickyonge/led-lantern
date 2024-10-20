@@ -14,12 +14,12 @@ RotaryEncoder encoder(PIN_ENC_CLK, PIN_ENC_DAT, ENC_LATCH_MODE);
 
 #ifdef USE_ENCODER_SWITCH_LOGIC
 bool encSwitchInputProcessed = false; // was an input processed by all valid sources? flag to prevent multiple firings per input
+int encSwitchInputDelay = 0;          // forced delay to prevent processing of any switch input
 #ifdef ENCODER_SWITCH_LOGIC_POLL
 bool encSwitchPoll = false;  // is rotary encoder switch currently pressed, as determined by pin polling?
 int encSwitchPollBuffer = 0; // raw buffer for reading enc switch over several frames following a valid pin poll
 #endif
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
-bool encSwitchInterrupt = false;  // is rotary encoder switch currently pressed, as determined by pin interrupt?
 int encSwitchInterruptBuffer = 0; // raw buffer for reading enc switch for several frames following an interrupt
 #endif
 #endif
@@ -75,15 +75,21 @@ void loopInput()
     // read switch interrupt buffer (read it up here because it gets referenced in multiple places below)
     if (interruptedBySwitch)
     {
-        encSwitchInterruptBuffer = ENCODER_SWITCH_INPUT_BUFFER;
+        if (encSwitchInputDelay == 0) // confirm input read delay is done
+        {
+            encSwitchInterruptBuffer = ENCODER_SWITCH_INPUT_BUFFER;
+        }
     }
-    encSwitchInterrupt = encSwitchInterruptBuffer > 0;
+    bool encSwitchInterrupt = encSwitchInterruptBuffer > 0;
 #endif
 #ifdef ENCODER_SWITCH_LOGIC_POLL
     bool lastSwitchPoll = encSwitchPoll; // preserve last switch state
-    if (!digitalRead(PIN_ENC_SWITCH))    // NC switch, invert
+    if (encSwitchInputDelay == 0)        // confirm input read delay is done
     {
-        encSwitchPollBuffer = ENCODER_SWITCH_INPUT_BUFFER;
+        if (!digitalRead(PIN_ENC_SWITCH)) // NC switch, invert
+        {
+            encSwitchPollBuffer = ENCODER_SWITCH_INPUT_BUFFER;
+        }
     }
     encSwitchPoll = encSwitchPollBuffer > 0;
     if (lastSwitchPoll != encSwitchPoll)
@@ -126,8 +132,10 @@ void loopInput()
         // input has NOT YET been processed, check if valid switch input received
         if (switchInputReceived)
         {
+#ifdef ENCODER_SWITCH_JUMPS_LEDS
             // jump LED colour to opposite end of spectrum
             jumpLEDColor();
+#endif
             // confirm we've processed the input
             encSwitchInputProcessed = true;
         }
@@ -157,7 +165,7 @@ void loopInput()
 #error "neither switch interrupt nor pin polling logic defined, can't reset input processed, at least one should be defined, otherwise undefine USE_ENCODER_SWITCH_LOGIC"
 #endif // end resetting enc switch input processing
     }
-    // lastly, decrement input buffers
+    // lastly, decrement input buffers and delays
 #ifdef ENCODER_SWITCH_LOGIC_POLL
     if (encSwitchPollBuffer > 0)
     {
@@ -178,6 +186,14 @@ void loopInput()
         }
     }
 #endif
+    if (encSwitchInputDelay > 0)
+    {
+        encSwitchInputDelay -= DELAY_INTERVAL;
+        if (encSwitchInputDelay < 0)
+        {
+            encSwitchInputDelay = 0;
+        }
+    }
 
 #endif // end USE_ENCODER_SWITCH_LOGIC
 
@@ -267,6 +283,19 @@ void inputEncoder()
 
 void sleepInput()
 {
+    // reset switch input buffers
+#ifdef USE_ENCODER_SWITCH_LOGIC
+#ifdef ENCODER_SWITCH_LOGIC_POLL
+    encSwitchPollBuffer = 0;
+#endif
+#ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
+    encSwitchInterruptBuffer = 0;
+#endif
+#endif
+// disable interrupts as needed
+#ifndef ENC_SWITCH_WAKES_DEVICE
+    disableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT);
+#endif
 #ifndef ENC_ROTATION_WAKES_DEVICE
 #ifdef POLL_ENCODER_INTERRUPTS
     disableInterrupt(PIN_ENC_DAT);
@@ -276,10 +305,15 @@ void sleepInput()
 }
 void wakeInput()
 {
+// re-enable interrupts
+#ifndef ENC_SWITCH_WAKES_DEVICE
+    enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING);
+#endif
 #ifndef ENC_ROTATION_WAKES_DEVICE
 #ifdef POLL_ENCODER_INTERRUPTS
     enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
     enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);
 #endif
 #endif
+    encSwitchInputDelay = ENCODER_SWITCH_WAKE_INPUT_DELAY;
 }
