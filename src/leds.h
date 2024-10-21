@@ -30,7 +30,7 @@ void updateLEDs();
 
 // debug convenience function to shift LED colour by 128 (opposite end of the spectrum from current)
 void jumpLEDColor();
-// debug convenience function to set every LED colour to CRGB::RED
+// debug convenience function to set every LED colour to `CRGB::RED`
 void testLEDColor();
 
 #ifdef ENABLE_ANIMATION

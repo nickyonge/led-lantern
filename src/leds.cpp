@@ -2,6 +2,8 @@
 
 static bool savedLEDsThisSession = false; // on first save, ensure LEDs are updated correctly only once
 
+volatile bool queueUpdateLEDs = false; // if true, calls `updateLEDs()` at the start of the next `loopLEDs` cycle
+
 CRGB leds[NUM_LEDS];
 static int ledColor = DATA_DEFAULT_LED_HUE; // current LED HSV hue
 
@@ -36,6 +38,10 @@ void setupLEDs()
 
 void loopLEDs()
 {
+    if (queueUpdateLEDs)
+    {
+        updateLEDs();
+    }
 #ifdef ENABLE_ANIMATION
     // run animation
     if (animate)
@@ -119,7 +125,8 @@ void jumpLEDColor()
     shiftLEDColor(128);
 }
 
-void testLEDColor() {
+void testLEDColor()
+{
     ledColor = 0;
     updateLEDs();
 }
@@ -127,7 +134,6 @@ void testLEDColor() {
 #ifdef ENABLE_ANIMATION
 void animateLEDs()
 {
-
 }
 #endif
 
@@ -142,8 +148,8 @@ void sleepLEDs()
 }
 void wakeLEDs()
 {
-    // wake LEDs so the strip is displayed again
-    updateLEDs();
+    // queue an update to wake the LEDs so the strip is displayed again
+    queueUpdateLEDs = true;
 }
 
 //
