@@ -120,7 +120,6 @@ void loopInput()
     if (encSwitchInterrupt)
     {
         inputProcessed = true; // confirm input processed
-        jumpLEDColor();
     }
 #else
 #error "neither switch interrupt nor pin polling logic defined, can't read switch input, at least one should be defined, otherwise undefine USE_ENCODER_SWITCH_LOGIC"
