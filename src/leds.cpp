@@ -32,6 +32,11 @@ void setupLEDs()
     // load intial values
     loadLEDData();
 
+// init random seed
+#ifdef ENABLE_ANIMATION
+    randomSeed(analogRead(PIN_RANDOMSEED));
+#endif
+
     // initial update (failsafe, technically called in main as well)
     updateLEDs();
 }

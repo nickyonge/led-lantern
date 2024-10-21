@@ -28,13 +28,13 @@ void resetSleepTimer();
 // IMPORTANT: Do NOT call `goToSleep` from an interrupt or otherwise outside the main cycle.
 // This may cause issues when putting other classes to sleep.
 //
-// ~ ~ ~ ~ ~ 
+// ~ ~ ~ ~ ~
 //
 // HOWEVER: Always assume that the WAKE cycle IS coming from an interrupt!
 // Any properties there must be volatile. Set flags for the next `loop()` cycle.
-// 
-// ~ ~ ~ ~ ~ 
-// 
+//
+// ~ ~ ~ ~ ~
+//
 // ALSO: if no interrupts are set up, THIS FUNCTIONALLY DISABLES THE DEVICE. BE CAREFUL!
 void goToSleep();
 
