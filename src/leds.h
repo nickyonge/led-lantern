@@ -14,9 +14,10 @@
 #define NUM_LEDS 12
 #define LED_BRIGHTNESS 120
 
-// #define ENABLE_ANIMATION
+#define ENABLE_ANIMATION
 
 #ifdef ENABLE_ANIMATION
+#include <Random16.h>
 #define ANIM_FPS 30 // Frames per second the animation will render at
 #endif
 

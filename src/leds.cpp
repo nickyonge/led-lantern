@@ -11,6 +11,7 @@ static CRGB colorsArray[NUM_LEDS];
 bool clearLEDs = false;
 
 #ifdef ENABLE_ANIMATION
+Random16 rng;
 bool animate = true;
 bool reverseAnimDirection = false;
 int animTimer = 0;
@@ -34,7 +35,7 @@ void setupLEDs()
 
 // init random seed
 #ifdef ENABLE_ANIMATION
-    randomSeed(analogRead(PIN_RANDOMSEED));
+    rng.setSeed(analogRead(PIN_RANDOMSEED));
 #endif
 
     // initial update (failsafe, technically called in main as well)
