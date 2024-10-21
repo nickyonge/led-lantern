@@ -43,7 +43,7 @@ void setupInput()
     // encoder switch pin
     pinMode(PIN_ENC_SWITCH, INPUT_PULLUP);
     // enable interrupt on enc switch pin
-    
+
     enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING);
     // check for encoder data interrupts
 #if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
@@ -51,21 +51,6 @@ void setupInput()
     enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);
 #endif
 }
-
-void interruptSwitch()
-{
-    interruptedBySwitch = true;
-}
-
-#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
-void interruptEncoder()
-{
-    interruptedByEncoder = true;
-#ifdef POLL_ENCODER_INTERRUPTS
-    encoder->tick();
-#endif
-}
-#endif
 
 void loopInput()
 {
@@ -226,13 +211,14 @@ void loopInput()
 
 #endif // end USE_ENCODER_SWITCH_LOGIC
 
-    // update and read rotary encoder movement
+    // update and read rotary encoder movement (interrupted)
 #ifdef POLL_ENCODER_INTERRUPTS
 #ifdef POLL_ENCODER_LOOP
     encoder->tick();
 #endif
     int newPos = encoder->getPosition();
 #else
+    // update and read rotary encoder movement (non-interrupted)
 #ifdef POLL_ENCODER_LOOP
     encoder.tick();
 #endif
@@ -303,6 +289,21 @@ void loopInput()
     }
 }
 
+void interruptSwitch()
+{
+    interruptedBySwitch = true;
+}
+
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
+void interruptEncoder()
+{
+    interruptedByEncoder = true;
+#ifdef POLL_ENCODER_INTERRUPTS
+    encoder->tick();
+#endif
+}
+#endif
+
 void inputSwitch()
 {
 }
@@ -348,4 +349,18 @@ void wakeInput()
 #endif
 #endif
     encSwitchInputDelay = ENCODER_SWITCH_WAKE_INPUT_DELAY;
+}
+bool validWakeUp()
+{
+// check valid wakeup types
+#ifdef ENC_SWITCH_WAKES_DEVICE
+    // at least, check for that
+    if (interruptedBySwitch)
+    {
+        // check for invalid switch timing
+        // TODO: invalid sw time
+    }
+#endif
+    // the only invalid circumstance involves the switch, and we checked for that, return true
+    return true;
 }

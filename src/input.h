@@ -21,7 +21,7 @@
 #define ENCODER_SWITCH_INPUT_BUFFER 10     // time in ms to buffer any input received on the encoder switch
 #define ENCODER_SWITCH_LOGIC_POLL          // process encoder switch logic by reading pins in loopInput()
 #define ENCODER_SWITCH_LOGIC_INTERRUPT     // process encoder switch logic by waiting for an interrupt on the switch pin
-#define ENCODER_SWITCH_JUMPS_LEDS          // switch input causes LEDs to jump halfway across the colour spectrum
+// #define ENCODER_SWITCH_JUMPS_LEDS          // switch input causes LEDs to jump halfway across the colour spectrum
 #ifdef ENCODER_SWITCH_LOGIC_POLL
 #define ENC_HELD_SLEEP_TIMEOUT 3000 // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
 #endif
@@ -67,6 +67,9 @@ void inputEncoder();
 void sleepInput();
 // call from sleep.h when device wakes up (to re-enable input interrupts)
 void wakeInput();
+// Check to see if the wakeup was valid - if so, continue wakeup - if not, put device back to sleep.
+// Wakeup is INVALID if it's via the SWITCH interrupt, 
+bool validWakeUp();
 
 // error check for no encoder polling
 #if !defined(POLL_ENCODER_INTERRUPTS) && !defined(POLL_ENCODER_LOOP)
