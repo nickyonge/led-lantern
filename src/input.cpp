@@ -10,8 +10,11 @@
 
 static int encPos = 0; // current position of rotary encoder
 
-volatile bool interruptedBySwitch = false;  // was interrupt via enc switch called before last loop cylce?
+volatile bool clearBuffersAndTimers = false; // clear buffers/timers on next cycle (to avoid directly modifying them in sleep/wake cycle)
+volatile bool interruptedBySwitch = false;   // was interrupt via enc switch called before last loop cylce?
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
 volatile bool interruptedByEncoder = false; // was interrupt via encoder rotation called before last loop cycle?
+#endif
 
 #ifdef POLL_ENCODER_INTERRUPTS
 RotaryEncoder *encoder = nullptr;
@@ -43,7 +46,6 @@ void setupInput()
     // encoder switch pin
     pinMode(PIN_ENC_SWITCH, INPUT_PULLUP);
     // enable interrupt on enc switch pin
-
     enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING);
     // check for encoder data interrupts
 #if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
@@ -54,8 +56,30 @@ void setupInput()
 
 void loopInput()
 {
-    bool inputProcessed = false; // was any input, or result of an input, or interrupt, processed this cycle?
-    bool lastInterrupted = interruptedBySwitch || interruptedByEncoder;
+    // check to clear buffers/timers from a wakeup cycle
+    if (clearBuffersAndTimers)
+    {
+#ifdef USE_ENCODER_SWITCH_LOGIC
+#ifdef ENCODER_SWITCH_LOGIC_POLL
+        encSwitchPollBuffer = 0;
+#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
+        encSwitchHeldTime = 0;
+#endif
+#endif
+#ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
+        encSwitchInterruptBuffer = 0;
+#endif
+#endif
+        encSwitchInputDelay = ENCODER_SWITCH_WAKE_INPUT_DELAY;
+    }
+
+    // prep input state properties
+    bool inputProcessed = false; // was ANY input/interrupt processed this cycle?
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
+    bool lastInterrupted = interruptedBySwitch || interruptedByEncoder; // was an interrupt received by either switch or encoder?
+#else
+    bool lastInterrupted = interruptedBySwitch; // was an interrupt received by switch?
+#endif
 
     // check for interrupt since previous cycle
     if (lastInterrupted)
@@ -285,7 +309,9 @@ void loopInput()
     if (lastInterrupted)
     {
         interruptedBySwitch = false;
+#if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
         interruptedByEncoder = false;
+#endif
     }
 }
 
@@ -314,17 +340,7 @@ void inputEncoder()
 void sleepInput()
 {
     // reset switch timers and input buffers
-#ifdef USE_ENCODER_SWITCH_LOGIC
-#ifdef ENCODER_SWITCH_LOGIC_POLL
-    encSwitchPollBuffer = 0;
-#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
-    encSwitchHeldTime = 0;
-#endif
-#endif
-#ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
-    encSwitchInterruptBuffer = 0;
-#endif
-#endif
+    clearBuffersAndTimers = true;
 // disable interrupts as needed
 #ifndef ENC_SWITCH_WAKES_DEVICE
     disableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT);
@@ -348,7 +364,8 @@ void wakeInput()
     enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);
 #endif
 #endif
-    encSwitchInputDelay = ENCODER_SWITCH_WAKE_INPUT_DELAY;
+    // ensure clear buffers is still true, post wakeup, for next cycle
+    clearBuffersAndTimers = true;
 }
 bool validWakeUp()
 {
