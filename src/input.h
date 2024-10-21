@@ -9,8 +9,8 @@
 #include "sleep.h"
 #include "leds.h"
 
-#define ENC_SWITCH_WAKES_DEVICE // clicking the encoder switch will wake the device
-// #define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
+#define ENC_SWITCH_WAKES_DEVICE   // clicking the encoder switch will wake the device
+#define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
 #define POLL_ENCODER_INTERRUPTS   // poll the encoder rotation during clk/data pin interrupts
 #define POLL_ENCODER_LOOP         // poll the encoder rotation during loopInput cycle
 #define ENC_ROTATION_ACCELERATION // should encoder speed be accelerated?
@@ -21,7 +21,10 @@
 #define ENCODER_SWITCH_INPUT_BUFFER 10     // time in ms to buffer any input received on the encoder switch
 #define ENCODER_SWITCH_LOGIC_POLL          // process encoder switch logic by reading pins in loopInput()
 #define ENCODER_SWITCH_LOGIC_INTERRUPT     // process encoder switch logic by waiting for an interrupt on the switch pin
-#define ENCODER_SWITCH_JUMPS_LEDS   // switch input causes LEDs to jump halfway across the colour spectrum 
+#define ENCODER_SWITCH_JUMPS_LEDS          // switch input causes LEDs to jump halfway across the colour spectrum
+#ifdef ENCODER_SWITCH_LOGIC_POLL
+#define ENC_HELD_SLEEP_TIMEOUT 3000 // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
+#endif
 #endif
 
 #ifdef ENC_ROTATION_ACCELERATION

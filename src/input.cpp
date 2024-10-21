@@ -22,6 +22,9 @@ int encSwitchPollBuffer = 0; // raw buffer for reading enc switch over several f
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
 int encSwitchInterruptBuffer = 0; // raw buffer for reading enc switch for several frames following an interrupt
 #endif
+#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
+int encSwitchHeldTime = 0;
+#endif
 #endif
 
 void setupInput()
@@ -33,6 +36,7 @@ void setupInput()
     // encoder switch pin
     pinMode(PIN_ENC_SWITCH, INPUT_PULLUP);
     // enable interrupt on enc switch pin
+    
     enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING);
     // check for encoder data interrupts
 #if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
@@ -194,6 +198,25 @@ void loopInput()
         }
     }
 
+// track how long encoder input has been held down (requires poll logic)
+#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
+    if (encSwitchPoll)
+    {
+        // holding switch down
+        encSwitchHeldTime += DELAY_INTERVAL;
+        if (encSwitchHeldTime >= ENC_HELD_SLEEP_TIMEOUT)
+        {
+            // switch held long enough to put device to sleep
+            goToSleep();
+        }
+    }
+    else
+    {
+        // switch not held, reset timer
+        encSwitchHeldTime = 0;
+    }
+#endif
+
 #endif // end USE_ENCODER_SWITCH_LOGIC
 
     // update and read rotary encoder movement
@@ -282,10 +305,13 @@ void inputEncoder()
 
 void sleepInput()
 {
-    // reset switch input buffers
+    // reset switch timers and input buffers
 #ifdef USE_ENCODER_SWITCH_LOGIC
 #ifdef ENCODER_SWITCH_LOGIC_POLL
     encSwitchPollBuffer = 0;
+#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
+    encSwitchHeldTime = 0;
+#endif
 #endif
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
     encSwitchInterruptBuffer = 0;
