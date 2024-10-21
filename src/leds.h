@@ -34,7 +34,7 @@ void jumpLEDColor();
 void testLEDColor();
 
 #ifdef ENABLE_ANIMATION
-// LED animation sourced from FastLED's Fire2012
+// process one frame of LED animation
 void animateLEDs();
 #endif
 
