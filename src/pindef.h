@@ -3,8 +3,8 @@
 
 #define PIN_LED_DATA 5
 
-#define PIN_ENC_CLK 6
-#define PIN_ENC_DAT 7
+#define PIN_ENC_CLK 9
+#define PIN_ENC_DAT 10
 #define PIN_ENC_SWITCH 8 // int0
 
 /* PINOUT DIAGRAMS FOR ATTINYX4 / ATTINYX5

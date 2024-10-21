@@ -1,4 +1,11 @@
 #include "input.h"
+
+// disable inclusion of unused interrupt pins from EnableInterrupt.h (save space)
+// we are using all external interrupts (8), and pin change interrupts 6 and 7
+// all of these are on port B, so we disable port A
+#define EI_NOTPORTA
+
+// including EnableInterrupt.h in the header file causes compile errors and for the life of me I can't figure out why
 #include <EnableInterrupt.h>
 
 static int encPos = 0; // current position of rotary encoder
