@@ -23,8 +23,8 @@
 #define ENCODER_SWITCH_LOGIC_INTERRUPT     // process encoder switch logic by waiting for an interrupt on the switch pin
 // #define ENCODER_SWITCH_JUMPS_LEDS          // switch input causes LEDs to jump halfway across the colour spectrum
 #ifdef ENCODER_SWITCH_LOGIC_POLL
-#define ENC_HELD_SLEEP_TIMEOUT 3000    // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
-#define ENC_HELD_ADJUST_BRIGHTNESS 100 // how long, in ms, after holding the switch down, will rotating the encoder result adjusting brightness?
+#define ENC_HELD_SLEEP_TIMEOUT 2000    // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
+// #define ENC_HELD_ADJUST_BRIGHTNESS 100 // how long, in ms, after holding the switch down, will rotating the encoder result adjusting brightness?
 #if defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0
 #define ENC_ADJUST_BRIGHTNESS_AMT_DISABLES_SLEEP 8 // how much must the brightness value be adjusted before the sleep timeout is disabled until btn release?
 #endif

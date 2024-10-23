@@ -245,12 +245,12 @@ void loopInput()
             {
                 // not disabled, and switch held long enough to put device to sleep, nighty night
                 goToSleep();
-                return;
+                // return;
             }
 #else
             // no brightness check, and switch held long enough to put device to sleep, nighty night
             goToSleep();
-            return;
+            // return;
 #endif
         }
 #else

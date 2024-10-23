@@ -19,6 +19,11 @@ bool reverseAnimDirection = false;
 int animTimer = 0;
 #endif
 
+#ifdef DEBUG_FLASH_LED_0
+int debugFlashTimer = 0;
+bool debugFlashOn = false;
+#endif
+
 //
 // ------------------------------------------------------------ [  SETUP AND LOOP  ] ---------
 //
@@ -50,7 +55,16 @@ void setupLEDs()
 
 void loopLEDs()
 {
-    // check for queued LED update (probably from a wake cycle)
+#ifdef DEBUG_FLASH_LED_0
+    debugFlashTimer += DELAY_INTERVAL;
+    if (debugFlashTimer >= 1000)
+    {
+        debugFlashTimer -= 1000;
+        debugFlashOn = !debugFlashOn;
+        queueUpdateLEDs = true;
+    }
+#endif
+    // check for queued LED update (probably from a wake cycle, or debug flash)
     if (queueUpdateLEDs)
     {
         updateLEDs();
@@ -101,7 +115,6 @@ void updateLEDs()
 #else
     if (clearLEDs)
     {
-        clearLEDs = false;
         for (int i = 0; i < NUM_LEDS; i++)
         {
             leds[i] = CRGB::Black;
@@ -115,7 +128,14 @@ void updateLEDs()
         }
     }
 #endif
+    // check for debug LED flashing
+#ifdef DEBUG_FLASH_LED_0
+    leds[0] = debugFlashOn && !clearLEDs ? CRGB::Red : CRGB::Black;
+#endif
+    // update FastLED strip
     FastLED.show();
+    // reset clear LEDs
+    clearLEDs = false;
 }
 
 void shiftLEDColor(int delta)
@@ -210,10 +230,12 @@ void loadLEDData()
     }
     // load values
     ledColor = getSaveData()->color;
+    ledBrightness = getSaveData()->brightness;
 }
 void saveLEDData()
 {
     getSaveData()->color = ledColor;
+    getSaveData()->brightness = ledBrightness;
     queueSaveData();
     if (!savedLEDsThisSession)
     {
