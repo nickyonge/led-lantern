@@ -15,17 +15,21 @@
 #define POLL_ENCODER_LOOP         // poll the encoder rotation during loopInput cycle
 #define ENC_ROTATION_ACCELERATION // should encoder speed be accelerated?
 
-#define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt
+#define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt?
 #ifdef USE_ENCODER_SWITCH_LOGIC
 #define ENCODER_SWITCH_WAKE_INPUT_DELAY 10 // time in ms to delay reading switch input upon waking
 #define ENCODER_SWITCH_INPUT_BUFFER 10     // time in ms to buffer any input received on the encoder switch
-#define ENCODER_SWITCH_LOGIC_POLL          // process encoder switch logic by reading pins in loopInput()
+#define ENCODER_SWITCH_LOGIC_POLL          // process encoder switch logic by reading pins in loopInput() (requiured for switch held timeouts)
 #define ENCODER_SWITCH_LOGIC_INTERRUPT     // process encoder switch logic by waiting for an interrupt on the switch pin
 // #define ENCODER_SWITCH_JUMPS_LEDS          // switch input causes LEDs to jump halfway across the colour spectrum
 #ifdef ENCODER_SWITCH_LOGIC_POLL
-#define ENC_HELD_SLEEP_TIMEOUT 3000 // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
+#define ENC_HELD_SLEEP_TIMEOUT 3000    // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
+#define ENC_HELD_ADJUST_BRIGHTNESS 100 // how long, in ms, after holding the switch down, will rotating the encoder result adjusting brightness?
+#if defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0
+#define ENC_ADJUST_BRIGHTNESS_AMT_DISABLES_SLEEP 8 // how much must the brightness value be adjusted before the sleep timeout is disabled until btn release?
 #endif
-#endif
+#endif // end ENCODER_SWITCH_LOGIC_POLL
+#endif // USE_ENCODER_SWITCH_LOGIC
 
 #ifdef ENC_ROTATION_ACCELERATION
 // accel per https://github.com/mathertel/RotaryEncoder/blob/master/examples/AcceleratedRotator/AcceleratedRotator.ino
@@ -60,15 +64,12 @@ void interruptSwitch();
 void interruptEncoder();
 #endif
 
-void inputSwitch();
-void inputEncoder();
-
 // call from sleep.h when device is put to sleep (to disable input interrupts)
 void sleepInput();
 // call from sleep.h when device wakes up (to re-enable input interrupts)
 void wakeInput();
 // Check to see if the wakeup was valid - if so, continue wakeup - if not, put device back to sleep.
-// Wakeup is INVALID if it's via the SWITCH interrupt, 
+// Wakeup is INVALID if it's via the SWITCH interrupt,
 bool validWakeUp();
 
 // error check for no encoder polling

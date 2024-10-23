@@ -32,8 +32,14 @@ int encSwitchPollBuffer = 0; // raw buffer for reading enc switch over several f
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
 int encSwitchInterruptBuffer = 0; // raw buffer for reading enc switch for several frames following an interrupt
 #endif
-#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
-int encSwitchHeldTime = 0;
+#if (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0) || (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0)
+int encSwitchHeldTime = 0; // if enc sleep timeout, OR hold switch for button, use `encSwitchHeldTime`
+#if (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0)
+#if (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0)
+int encBrightnessDeltaBuffer = 0;               // tracked delta valueu for enc brightness adjustment, to see about disabling `goToSleep` hold timer
+bool encSleepDisabledByBrightnessDelta = false; // has sleep timeout been disabled by the brightness delta?
+#endif
+#endif
 #endif
 #endif
 
@@ -62,8 +68,12 @@ void loopInput()
 #ifdef USE_ENCODER_SWITCH_LOGIC
 #ifdef ENCODER_SWITCH_LOGIC_POLL
         encSwitchPollBuffer = 0;
-#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
+#if (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0) || (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0)
         encSwitchHeldTime = 0;
+#if (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0) && (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0)
+        encBrightnessDeltaBuffer = 0;
+        encSleepDisabledByBrightnessDelta = false;
+#endif
 #endif
 #endif
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
@@ -214,22 +224,52 @@ void loopInput()
         }
     }
 
-// track how long encoder input has been held down (requires poll logic)
-#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
+// track how long encoder input has been held down (requires poll logic) if tracking either hold-to-sleep or hold-to-adj-brightness
+#if (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0) || (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0)
     if (encSwitchPoll)
     {
         // holding switch down
         encSwitchHeldTime += DELAY_INTERVAL;
+#if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
+        // check for sleep timeout
         if (encSwitchHeldTime >= ENC_HELD_SLEEP_TIMEOUT)
         {
-            // switch held long enough to put device to sleep
+// ensure sleep timer isn't disabled by brightness delta
+#if defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0
+            if (encSleepDisabledByBrightnessDelta)
+            {
+                // brightness delta held down long enough to disable sleep timeout, just lock the timer
+                encSwitchHeldTime = ENC_HELD_SLEEP_TIMEOUT;
+            }
+            else
+            {
+                // not disabled, and switch held long enough to put device to sleep, nighty night
+                goToSleep();
+                return;
+            }
+#else
+            // no brightness check, and switch held long enough to put device to sleep, nighty night
             goToSleep();
+            return;
+#endif
         }
+#else
+        // not tracking sleep, just brightness adjustment, lock encSwitchHeldTime to ENC_HELD_ADJUST_BRIGHTNESS
+        if (encSwitchHeldTime > ENC_HELD_ADJUST_BRIGHTNESS)
+        {
+            encSwitchHeldTime = ENC_HELD_ADJUST_BRIGHTNESS;
+        }
+#endif // end encSwitchHeldTime checks
     }
     else
     {
         // switch not held, reset timer
         encSwitchHeldTime = 0;
+#if (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0) && (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0)
+        // brightness timer defined, ensurue brightness delta buffer also reset
+        encBrightnessDeltaBuffer = 0;
+        encSleepDisabledByBrightnessDelta = false;
+#endif
     }
 #endif
 
@@ -289,11 +329,37 @@ void loopInput()
 #endif
 #endif
 
-        // update LED colour by delta amount
-        shiftLEDColor(delta);
-
-        // confirm input processed
-        inputProcessed = true;
+        // check for delta
+        if (delta != 0)
+        {
+            // update LED colour/brightness by delta amount
+#if defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0
+            if (encSwitchHeldTime >= ENC_HELD_ADJUST_BRIGHTNESS)
+            {
+                // enc switch is held, adjust brightness
+                shiftLEDBrightness(delta);
+#if (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0) && (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0)
+                // track brightness delta to check for sleep timeout disable
+                encBrightnessDeltaBuffer += delta;
+                if (abs(encBrightnessDeltaBuffer) >= ENC_ADJUST_BRIGHTNESS_AMT_DISABLES_SLEEP)
+                {
+                    // yup, brightness has changed sufficiently to disable sleep timeout
+                    encSleepDisabledByBrightnessDelta = true;
+                }
+#endif
+            }
+            else
+            {
+                // enc switch not held, adjust colour
+                shiftLEDColor(delta);
+            }
+#else
+            // update LED colour only
+            shiftLEDColor(delta);
+#endif
+            // confirm input processed
+            inputProcessed = true;
+        }
 
         // update stored encoder position
         encPos = newPos;
@@ -329,13 +395,6 @@ void interruptEncoder()
 #endif
 }
 #endif
-
-void inputSwitch()
-{
-}
-void inputEncoder()
-{
-}
 
 void sleepInput()
 {
