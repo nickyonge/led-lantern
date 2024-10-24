@@ -2,7 +2,6 @@
 #define MAIN_H
 
 #include <Arduino.h>
-#include <FastLED.h>
 
 // How many ticks in one second?
 //
@@ -11,7 +10,9 @@
 // So, for now, 1000/2.5 = 400, and subjectively
 // 400 is too fast, so we use 420 =_=;;;;
 // it even varies between MCUs... ugh.
-#define CYCLES_SECOND 420 
+// #define CYCLES_SECOND 420 
+
+#define CYCLES_SECOND 1000
 
 #define DELAY_INTERVAL 1 // delay in ms per loop() cycle
 // NOTE: DELAY_INTERVAL value should be such that 

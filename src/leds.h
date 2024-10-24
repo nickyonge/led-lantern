@@ -17,7 +17,7 @@
 #define LED_MAX_BRIGHTNESS 25 // max brightness permitted by FastLED
 #define LED_MIN_BRIGHTNESS 10  // min brightness given via HSV values
 
-#define DEBUG_FLASH_LED_0 // if defined, flash LED 0 red on/off every second
+// #define DEBUG_FLASH_LED_0 // if defined, flash LED 0 red on/off every second
 
 // #define LED_MAX_MILLIAMP_DRAW 250 // if defined, set max mA/H draw permitted by FastLED
 
