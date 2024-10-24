@@ -8,30 +8,32 @@ byte minutesIdle = 0;
 
 void setupSleep()
 {
+#ifdef ENABLE_SLEEP
     // prep correct sleep mode
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    // info on sleep modes: https://onlinedocs.microchip.com/oxy/GUID-A834D554-5741-41A3-B5E1-35ED7CD8250A-en-US-5/GUID-35CAFA19-CA93-4B3E-AEE3-481B8542FE94.html
+// info on sleep modes: https://onlinedocs.microchip.com/oxy/GUID-A834D554-5741-41A3-B5E1-35ED7CD8250A-en-US-5/GUID-35CAFA19-CA93-4B3E-AEE3-481B8542FE94.html
+#endif
 }
 
 void loopSleep()
 {
 #ifdef USE_SLEEP_TIMER
     // increment idle timer
-    loopsIdle++;
-    if (loopsIdle >= secondInterval)
+    loopsIdle += DELAY_INTERVAL;
+    if (loopsIdle >= CYCLES_SECOND)
     {
         // increment seconds and minutes as needed
-        loopsIdle = 0;
+        loopsIdle -= CYCLES_SECOND;
         secondsIdle++;
-        if (secondsIdle >= SECONDS_MAX)
+        if (secondsIdle >= SECONDS_PER_MIN)
         {
             // seconds overflow, increment minute
-            secondsIdle = 0;
+            secondsIdle -= secondsIdle;
             minutesIdle++;
             // ensure minutesIdle does not exceed given limit
             if (minutesIdle > MINUTES_MAX)
             {
-                minutesIdle = MINUTES_MAX;
+                minutesIdle = MINUTES_MAX; // cap at MINUTES_MAX
             }
         }
         // check for sleep timer limits
@@ -55,6 +57,7 @@ void resetSleepTimer()
 
 void goToSleep()
 {
+#ifdef ENABLE_SLEEP
     // 1) Sleep other classes as necessary
     sleepInput(); // put input system to sleep
     sleepLEDs();  // put LED display to sleep
@@ -77,4 +80,5 @@ void goToSleep()
     // 5) Wake other classes as necessary
     wakeInput(); // wake up input system
     wakeLEDs();  // wake up LED display
+#endif
 }

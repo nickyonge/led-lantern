@@ -6,8 +6,10 @@ saveData data;
 
 EEWL eewlData(data, BUFFER_LENGTH, BUFFER_START);
 
+#ifdef ENABLE_SAVEDATA
 bool queuedSave = false;
 static int saveDelay = 0;
+#endif
 
 void setupSaveData()
 {
@@ -45,7 +47,8 @@ void loopSaveData()
     if (saveDelay > 0)
     {
         saveDelay -= DELAY_INTERVAL;
-        if (saveDelay < 0) {
+        if (saveDelay < 0)
+        {
             saveDelay = 0;
         }
         return;
@@ -63,7 +66,9 @@ void loopSaveData()
 
 void queueSaveData()
 {
+#ifdef ENABLE_SAVEDATA
     queuedSave = true;
+#endif
 }
 
 saveData *getSaveData()
@@ -71,9 +76,8 @@ saveData *getSaveData()
 #ifndef ENABLE_SAVEDATA
     // if savedata is disabled, force set "saved" flag to true, to allow functionality w/o save
     data.saved = true;
-#else
-    return &data;
 #endif
+    return &data;
 }
 
 void commitSaveData()

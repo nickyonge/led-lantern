@@ -1,5 +1,7 @@
 #include "input.h"
 
+#ifdef ENABLE_INPUT
+
 // disable inclusion of unused interrupt pins from EnableInterrupt.h (save space)
 // we are using all external interrupts (8), and pin change interrupts 6 and 7
 // all of these are on port B, so we disable port A
@@ -43,8 +45,11 @@ bool encSleepDisabledByBrightnessDelta = false; // has sleep timeout been disabl
 #endif
 #endif
 
+#endif
+
 void setupInput()
 {
+#ifdef ENABLE_INPUT
 // create encoder if necessary
 #ifdef POLL_ENCODER_INTERRUPTS
     encoder = new RotaryEncoder(PIN_ENC_CLK, PIN_ENC_DAT, ENC_LATCH_MODE);
@@ -58,10 +63,12 @@ void setupInput()
     enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
     enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);
 #endif
+#endif
 }
 
 void loopInput()
 {
+#ifdef ENABLE_INPUT
     // check to clear buffers/timers from a wakeup cycle
     if (clearBuffersAndTimers)
     {
@@ -79,8 +86,8 @@ void loopInput()
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
         encSwitchInterruptBuffer = 0;
 #endif
-#endif
         encSwitchInputDelay = ENCODER_SWITCH_WAKE_INPUT_DELAY;
+#endif
     }
 
     // prep input state properties
@@ -379,8 +386,10 @@ void loopInput()
         interruptedByEncoder = false;
 #endif
     }
+#endif // ENABLE_INPUT
 }
 
+#ifdef ENABLE_INPUT
 void interruptSwitch()
 {
     interruptedBySwitch = true;
@@ -395,9 +404,11 @@ void interruptEncoder()
 #endif
 }
 #endif
+#endif
 
 void sleepInput()
 {
+#ifdef ENABLE_INPUT
     // reset switch timers and input buffers
     clearBuffersAndTimers = true;
 // disable interrupts as needed
@@ -410,9 +421,11 @@ void sleepInput()
     disableInterrupt(PIN_ENC_CLK);
 #endif
 #endif
+#endif
 }
 void wakeInput()
 {
+#ifdef ENABLE_INPUT
 // re-enable interrupts
 #ifndef ENC_SWITCH_WAKES_DEVICE
     enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING);
@@ -425,9 +438,11 @@ void wakeInput()
 #endif
     // ensure clear buffers is still true, post wakeup, for next cycle
     clearBuffersAndTimers = true;
+#endif
 }
 bool validWakeUp()
 {
+#ifdef ENABLE_INPUT
 // check valid wakeup types
 #ifdef ENC_SWITCH_WAKES_DEVICE
     // at least, check for that
@@ -436,6 +451,7 @@ bool validWakeUp()
         // check for invalid switch timing
         // TODO: invalid sw time
     }
+#endif
 #endif
     // the only invalid circumstance involves the switch, and we checked for that, return true
     return true;

@@ -9,13 +9,16 @@
 #include "sleep.h"
 #include "leds.h"
 
+// #define ENABLE_INPUT // is input system enabled?
+#ifdef ENABLE_INPUT
+
 #define ENC_SWITCH_WAKES_DEVICE   // clicking the encoder switch will wake the device
 #define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
 #define POLL_ENCODER_INTERRUPTS   // poll the encoder rotation during clk/data pin interrupts
 #define POLL_ENCODER_LOOP         // poll the encoder rotation during loopInput cycle
 #define ENC_ROTATION_ACCELERATION // should encoder speed be accelerated?
 
-#define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt?
+// #define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt?
 #ifdef USE_ENCODER_SWITCH_LOGIC
 #define ENCODER_SWITCH_WAKE_INPUT_DELAY 10 // time in ms to delay reading switch input upon waking
 #define ENCODER_SWITCH_INPUT_BUFFER 10     // time in ms to buffer any input received on the encoder switch
@@ -54,14 +57,18 @@ constexpr float b = 1 - (longCutoff * a);                        // -9
 
 #define ENC_LATCH_MODE RotaryEncoder::LatchMode::FOUR3 // latch mode to use for rotary encoder
 
+#endif // ENABLE_INPUT
+
 void setupInput();
 void loopInput();
 
+#ifdef ENABLE_INPUT
 // callback for enc switch pin interrupt
 void interruptSwitch();
 #if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
 // callback for enc data pins interrupt (see )
 void interruptEncoder();
+#endif
 #endif
 
 // call from sleep.h when device is put to sleep (to disable input interrupts)
@@ -72,6 +79,7 @@ void wakeInput();
 // Wakeup is INVALID if it's via the SWITCH interrupt,
 bool validWakeUp();
 
+#ifdef ENABLE_INPUT
 // error check for no encoder polling
 #if !defined(POLL_ENCODER_INTERRUPTS) && !defined(POLL_ENCODER_LOOP)
 #error "Neither POLL_ENCODER_INTERRUPTS nor POLL_ENCODER_LOOP are defnied - at least ONE should be active!"
@@ -83,6 +91,7 @@ bool validWakeUp();
 // error check for impossible to wake device
 #if !defined(ENC_SWITCH_WAKES_DEVICE) && !defined(ENC_ROTATION_WAKES_DEVICE)
 #error "Uh-oh, neither clicking nor rotating the encoder will wake the device. It's gonna sleep forever! One must be defined"
+#endif
 #endif
 
 #endif // INPUT_H

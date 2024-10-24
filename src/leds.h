@@ -11,9 +11,10 @@
 #define CHIPSET WS2812B
 #define RGB_ORDER GRB
 
-#define NUM_LEDS 12
+// #define NUM_LEDS 12
+#define NUM_LEDS 5
 
-#define LED_MAX_BRIGHTNESS 120 // max brightness permitted by FastLED
+#define LED_MAX_BRIGHTNESS 25 // max brightness permitted by FastLED
 #define LED_MIN_BRIGHTNESS 10  // min brightness given via HSV values
 
 #define DEBUG_FLASH_LED_0 // if defined, flash LED 0 red on/off every second

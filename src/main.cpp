@@ -3,19 +3,20 @@
 void setup()
 {
     // call class-specific setup functions
-    setupSaveData();
-    setupSleep();
-    setupInput();
+    // setupSaveData();
+    // setupSleep();
+    // setupInput();
     setupLEDs(); // setup LEDs last (after Input)
 }
 
 void loop()
 {
-    loopInput();
+    // loopInput();
     loopLEDs();
-    loopSaveData();
-    loopSleep();
+    // loopSaveData();
+    // loopSleep();
 
-    // 1ms loop interval
+    // loop interval
+    // FastLED.delay(DELAY_INTERVAL);
     delay(DELAY_INTERVAL);
 }

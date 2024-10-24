@@ -50,16 +50,17 @@ void setupLEDs()
 #endif
 
     // initial update (failsafe, technically called in main as well)
-    updateLEDs();
+    queueUpdateLEDs = true;
+    // updateLEDs();
 }
 
 void loopLEDs()
 {
 #ifdef DEBUG_FLASH_LED_0
     debugFlashTimer += DELAY_INTERVAL;
-    if (debugFlashTimer >= 1000)
+    if (debugFlashTimer >= CYCLES_SECOND)
     {
-        debugFlashTimer -= 1000;
+        debugFlashTimer -= CYCLES_SECOND;
         debugFlashOn = !debugFlashOn;
         queueUpdateLEDs = true;
     }
@@ -98,7 +99,6 @@ void updateLEDs()
         {
             colorsArray[i] = CRGB::Black;
         }
-        clearLEDs = false;
     }
     else if (!animate)
         if (!animate)
@@ -187,6 +187,8 @@ void animateLEDs()
 
 byte getLEDBrightness()
 {
+    return 255;// TEMP
+    
     return map(ledBrightness, 0, 255, LED_MIN_BRIGHTNESS, 255);
 }
 
