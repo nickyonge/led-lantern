@@ -1,5 +1,7 @@
 #include "leds.h"
 
+static byte _loopIntervalLEDs = 0; // timer to keep track of loop() intervals for this class 
+
 static bool savedLEDsThisSession = false; // on first save, ensure LEDs are updated correctly only once
 
 volatile bool queueUpdateLEDs = false; // if true, calls `updateLEDs()` at the start of the next `loopLEDs` cycle
@@ -19,18 +21,25 @@ bool reverseAnimDirection = false;
 int animTimer = 0;
 #endif
 
+#ifdef DEBUG_FLASH_LED_0
+int debugFlashTimer = 0;
+bool debugFlashOn = false;
+#endif
+
 //
 // ------------------------------------------------------------ [  SETUP AND LOOP  ] ---------
 //
 
 void setupLEDs()
 {
-    // prep LEDs
+// prep LEDs
+#ifdef CALL_FASTLED_METHODS
     FastLED.setBrightness(LED_MAX_BRIGHTNESS);
     FastLED.addLeds<CHIPSET, PIN_LED_DATA, GRB>(leds, NUM_LEDS);
 
 #ifdef LED_MAX_MILLIAMP_DRAW
     FastLED.setMaxPowerInVoltsAndMilliamps(5, LED_MAX_MILLIAMP_DRAW);
+#endif
 #endif
 
     // clear LED local data
@@ -45,12 +54,35 @@ void setupLEDs()
 #endif
 
     // initial update (failsafe, technically called in main as well)
-    updateLEDs();
+    queueUpdateLEDs = true;
+    // updateLEDs();
 }
 
 void loopLEDs()
 {
-    // check for queued LED update (probably from a wake cycle)
+// check LEDs loop delay
+#if defined(LOOP_INTERVAL_LEDS) && LOOP_INTERVAL_LEDS > 1
+    _loopIntervalLEDs += DELAY_INTERVAL;
+    if (_loopIntervalLEDs >= LOOP_INTERVAL_LEDS)
+    {
+        _loopIntervalLEDs -= LOOP_INTERVAL_LEDS;
+    }
+    else
+    {
+        return;
+    }
+#endif
+// check debug flash
+#ifdef DEBUG_FLASH_LED_0
+    debugFlashTimer += LOOP_INTERVAL_LEDS;
+    if (debugFlashTimer >= 1000)
+    {
+        debugFlashTimer -= 1000;
+        debugFlashOn = !debugFlashOn;
+        queueUpdateLEDs = true;
+    }
+#endif
+    // check for queued LED update (probably from a wake cycle, or debug flash)
     if (queueUpdateLEDs)
     {
         updateLEDs();
@@ -60,7 +92,7 @@ void loopLEDs()
     if (animate)
     {
         // check timer
-        animTimer += DELAY_INTERVAL;
+        animTimer += LOOP_INTERVAL_LEDS;
         if (animTimer >= ANIM_FPS)
         {
             // reset anim timer, and animate LEDs
@@ -84,7 +116,6 @@ void updateLEDs()
         {
             colorsArray[i] = CRGB::Black;
         }
-        clearLEDs = false;
     }
     else if (!animate)
         if (!animate)
@@ -101,7 +132,6 @@ void updateLEDs()
 #else
     if (clearLEDs)
     {
-        clearLEDs = false;
         for (int i = 0; i < NUM_LEDS; i++)
         {
             leds[i] = CRGB::Black;
@@ -115,7 +145,16 @@ void updateLEDs()
         }
     }
 #endif
+    // check for debug LED flashing
+#ifdef DEBUG_FLASH_LED_0
+    leds[0] = debugFlashOn && !clearLEDs ? CRGB::Red : CRGB::Black;
+#endif
+// update FastLED strip
+#ifdef CALL_FASTLED_METHODS
     FastLED.show();
+#endif
+    // reset clear LEDs
+    clearLEDs = false;
 }
 
 void shiftLEDColor(int delta)
@@ -167,6 +206,8 @@ void animateLEDs()
 
 byte getLEDBrightness()
 {
+    return 255; // TEMP
+
     return map(ledBrightness, 0, 255, LED_MIN_BRIGHTNESS, 255);
 }
 
@@ -198,7 +239,9 @@ void clearLEDLocalData()
     //       Even tho the below is functionally identical, this does NOT break the build.
     clearLEDs = true;
     updateLEDs();
+#ifdef CALL_FASTLED_METHODS
     FastLED.clearData();
+#endif
 }
 
 void loadLEDData()
@@ -210,10 +253,12 @@ void loadLEDData()
     }
     // load values
     ledColor = getSaveData()->color;
+    ledBrightness = getSaveData()->brightness;
 }
 void saveLEDData()
 {
     getSaveData()->color = ledColor;
+    getSaveData()->brightness = ledBrightness;
     queueSaveData();
     if (!savedLEDsThisSession)
     {

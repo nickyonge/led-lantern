@@ -2,12 +2,16 @@
 
 #include "leds.h"
 
+static byte _loopIntervalSaveData = 0; // timer to keep track of loop() intervals for this class
+
 saveData data;
 
 EEWL eewlData(data, BUFFER_LENGTH, BUFFER_START);
 
+#ifdef ENABLE_SAVEDATA
 bool queuedSave = false;
 static int saveDelay = 0;
+#endif
 
 void setupSaveData()
 {
@@ -41,11 +45,24 @@ void setupSaveData()
 void loopSaveData()
 {
 #ifdef ENABLE_SAVEDATA
+    // check savedata loop delay
+#if defined(LOOP_INTERVAL_SAVEDATA) && LOOP_INTERVAL_SAVEDATA > 1
+        _loopIntervalSaveData += DELAY_INTERVAL;
+        if (_loopIntervalSaveData >= LOOP_INTERVAL_SAVEDATA)
+        {
+            _loopIntervalSaveData -= LOOP_INTERVAL_SAVEDATA;
+        }
+        else
+        {
+            return;
+        }
+#endif
     // decrement save delay
     if (saveDelay > 0)
     {
-        saveDelay -= DELAY_INTERVAL;
-        if (saveDelay < 0) {
+        saveDelay -= LOOP_INTERVAL_SAVEDATA;
+        if (saveDelay < 0)
+        {
             saveDelay = 0;
         }
         return;
@@ -63,7 +80,9 @@ void loopSaveData()
 
 void queueSaveData()
 {
+#ifdef ENABLE_SAVEDATA
     queuedSave = true;
+#endif
 }
 
 saveData *getSaveData()
@@ -71,9 +90,8 @@ saveData *getSaveData()
 #ifndef ENABLE_SAVEDATA
     // if savedata is disabled, force set "saved" flag to true, to allow functionality w/o save
     data.saved = true;
-#else
-    return &data;
 #endif
+    return &data;
 }
 
 void commitSaveData()

@@ -9,7 +9,10 @@
 
 #define ENABLE_SAVEDATA // Use SaveData? SaveData should be setup first and looped last
 
-#define DATA_DEFAULT_LED_HUE 213 // default HSV hue for LED colour 
+#define LOOP_INTERVAL_SAVEDATA 250 // how many ms in between loop() ticks for this class?
+
+#define DATA_DEFAULT_LED_HUE 213 // default HSV hue (H) for LED colour 
+#define DATA_DEFAULT_LED_VALUE 255 // default HSV value (V) for LED colour (brightness)
 
 #define CHECK_INDEX_VALIDITY false
 
@@ -34,6 +37,7 @@ struct saveData
     // have values previously been saved
     bool saved = false;
     byte color = DATA_DEFAULT_LED_HUE;
+    byte brightness = DATA_DEFAULT_LED_VALUE;
 };
 
 void setupSaveData();

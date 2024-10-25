@@ -8,17 +8,23 @@
 #include "pindef.h"
 #include "savedata.h"
 
+#define LOOP_INTERVAL_LEDS 33 // how many ms in between loop() ticks for this class?
+
 #define CHIPSET WS2812B
 #define RGB_ORDER GRB
 
-#define NUM_LEDS 12
+// #define NUM_LEDS 12
+#define NUM_LEDS 11
 
-#define LED_MAX_BRIGHTNESS 120 // max brightness permitted by FastLED
-#define LED_MIN_BRIGHTNESS 10  // min brightness given via HSV values
+#define LED_MAX_BRIGHTNESS 25 // max brightness permitted by FastLED
+#define LED_MIN_BRIGHTNESS 10 // min brightness given via HSV values
+
+#define DEBUG_FLASH_LED_0 // if defined, flash LED 0 red on/off every second
 
 // #define LED_MAX_MILLIAMP_DRAW 250 // if defined, set max mA/H draw permitted by FastLED
 
-#define ENABLE_ANIMATION // allow animation rendering?
+#define CALL_FASTLED_METHODS // call `FastLED.show` and other `FastLED.[thing]` methods? Used for debugging
+// #define ENABLE_ANIMATION // allow animation rendering?
 
 #ifdef ENABLE_ANIMATION
 #include <Random16.h>

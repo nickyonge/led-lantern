@@ -3,11 +3,13 @@
 
 #define PIN_LED_DATA 5 // pin for LEDs, must be `PWM`
 
-#define PIN_ENC_CLK 9 // pin for encoder `CLK` signal, must be on Port B
-#define PIN_ENC_DAT 10// pin for encoder `DAT` signal, must be on Port B
+#define PIN_ENC_CLK 9    // pin for encoder `CLK` signal, must be on Port B
+#define PIN_ENC_DAT 10   // pin for encoder `DAT` signal, must be on Port B
 #define PIN_ENC_SWITCH 8 // pin for encoder switch, must be on external interrupt (pin 8, INT0, Port B)
 
 #define PIN_RANDOMSEED A7 // pin for `randomSeed` sampling, must be an unconnected analog pin
+
+// TODO: External clock on X1/X2. Either move pins back onto Ports A/B cross, or move switch off of INTO (PB) and all pins onto Port A
 
 /* PINOUT DIAGRAMS FOR ATTINYX4 / ATTINYX5
 

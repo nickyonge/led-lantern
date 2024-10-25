@@ -9,6 +9,11 @@
 #include "sleep.h"
 #include "leds.h"
 
+#define ENABLE_INPUT // is input system enabled?
+#ifdef ENABLE_INPUT
+
+#define LOOP_INTERVAL_INPUT 20 // how many ms in between loop() ticks for this class?
+
 #define ENC_SWITCH_WAKES_DEVICE   // clicking the encoder switch will wake the device
 #define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
 #define POLL_ENCODER_INTERRUPTS   // poll the encoder rotation during clk/data pin interrupts
@@ -23,7 +28,7 @@
 #define ENCODER_SWITCH_LOGIC_INTERRUPT     // process encoder switch logic by waiting for an interrupt on the switch pin
 // #define ENCODER_SWITCH_JUMPS_LEDS          // switch input causes LEDs to jump halfway across the colour spectrum
 #ifdef ENCODER_SWITCH_LOGIC_POLL
-#define ENC_HELD_SLEEP_TIMEOUT 3000    // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
+#define ENC_HELD_SLEEP_TIMEOUT 2000    // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
 #define ENC_HELD_ADJUST_BRIGHTNESS 100 // how long, in ms, after holding the switch down, will rotating the encoder result adjusting brightness?
 #if defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0
 #define ENC_ADJUST_BRIGHTNESS_AMT_DISABLES_SLEEP 8 // how much must the brightness value be adjusted before the sleep timeout is disabled until btn release?
@@ -54,14 +59,18 @@ constexpr float b = 1 - (longCutoff * a);                        // -9
 
 #define ENC_LATCH_MODE RotaryEncoder::LatchMode::FOUR3 // latch mode to use for rotary encoder
 
+#endif // ENABLE_INPUT
+
 void setupInput();
 void loopInput();
 
+#ifdef ENABLE_INPUT
 // callback for enc switch pin interrupt
 void interruptSwitch();
 #if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
 // callback for enc data pins interrupt (see )
 void interruptEncoder();
+#endif
 #endif
 
 // call from sleep.h when device is put to sleep (to disable input interrupts)
@@ -72,6 +81,7 @@ void wakeInput();
 // Wakeup is INVALID if it's via the SWITCH interrupt,
 bool validWakeUp();
 
+#ifdef ENABLE_INPUT
 // error check for no encoder polling
 #if !defined(POLL_ENCODER_INTERRUPTS) && !defined(POLL_ENCODER_LOOP)
 #error "Neither POLL_ENCODER_INTERRUPTS nor POLL_ENCODER_LOOP are defnied - at least ONE should be active!"
@@ -83,6 +93,7 @@ bool validWakeUp();
 // error check for impossible to wake device
 #if !defined(ENC_SWITCH_WAKES_DEVICE) && !defined(ENC_ROTATION_WAKES_DEVICE)
 #error "Uh-oh, neither clicking nor rotating the encoder will wake the device. It's gonna sleep forever! One must be defined"
+#endif
 #endif
 
 #endif // INPUT_H

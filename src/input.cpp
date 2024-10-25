@@ -1,5 +1,7 @@
 #include "input.h"
 
+#ifdef ENABLE_INPUT
+
 // disable inclusion of unused interrupt pins from EnableInterrupt.h (save space)
 // we are using all external interrupts (8), and pin change interrupts 6 and 7
 // all of these are on port B, so we disable port A
@@ -7,6 +9,8 @@
 
 // including EnableInterrupt.h in the header file causes compile errors and for the life of me I can't figure out why
 #include <EnableInterrupt.h>
+
+static byte _loopIntervalInput = 0; // timer to keep track of loop() intervals for this class 
 
 static int encPos = 0; // current position of rotary encoder
 
@@ -43,8 +47,11 @@ bool encSleepDisabledByBrightnessDelta = false; // has sleep timeout been disabl
 #endif
 #endif
 
+#endif
+
 void setupInput()
 {
+#ifdef ENABLE_INPUT
 // create encoder if necessary
 #ifdef POLL_ENCODER_INTERRUPTS
     encoder = new RotaryEncoder(PIN_ENC_CLK, PIN_ENC_DAT, ENC_LATCH_MODE);
@@ -58,10 +65,24 @@ void setupInput()
     enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
     enableInterrupt(PIN_ENC_CLK, interruptEncoder, CHANGE);
 #endif
+#endif
 }
 
 void loopInput()
 {
+#ifdef ENABLE_INPUT
+// check input loop delay
+#if defined(LOOP_INTERVAL_INPUT) && LOOP_INTERVAL_INPUT > 1
+    _loopIntervalInput += DELAY_INTERVAL;
+    if (_loopIntervalInput >= LOOP_INTERVAL_INPUT)
+    {
+        _loopIntervalInput -= LOOP_INTERVAL_INPUT;
+    }
+    else
+    {
+        return;
+    }
+#endif
     // check to clear buffers/timers from a wakeup cycle
     if (clearBuffersAndTimers)
     {
@@ -79,8 +100,8 @@ void loopInput()
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
         encSwitchInterruptBuffer = 0;
 #endif
-#endif
         encSwitchInputDelay = ENCODER_SWITCH_WAKE_INPUT_DELAY;
+#endif
     }
 
     // prep input state properties
@@ -198,7 +219,7 @@ void loopInput()
 #ifdef ENCODER_SWITCH_LOGIC_POLL
     if (encSwitchPollBuffer > 0)
     {
-        encSwitchPollBuffer -= DELAY_INTERVAL;
+        encSwitchPollBuffer -= LOOP_INTERVAL_INPUT;
         if (encSwitchPollBuffer < 0)
         {
             encSwitchPollBuffer = 0;
@@ -208,7 +229,7 @@ void loopInput()
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
     if (encSwitchInterruptBuffer > 0)
     {
-        encSwitchInterruptBuffer -= DELAY_INTERVAL;
+        encSwitchInterruptBuffer -= LOOP_INTERVAL_INPUT;
         if (encSwitchInterruptBuffer < 0)
         {
             encSwitchInterruptBuffer = 0;
@@ -217,7 +238,7 @@ void loopInput()
 #endif
     if (encSwitchInputDelay > 0)
     {
-        encSwitchInputDelay -= DELAY_INTERVAL;
+        encSwitchInputDelay -= LOOP_INTERVAL_INPUT;
         if (encSwitchInputDelay < 0)
         {
             encSwitchInputDelay = 0;
@@ -229,7 +250,7 @@ void loopInput()
     if (encSwitchPoll)
     {
         // holding switch down
-        encSwitchHeldTime += DELAY_INTERVAL;
+        encSwitchHeldTime += LOOP_INTERVAL_INPUT;
 #if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
         // check for sleep timeout
         if (encSwitchHeldTime >= ENC_HELD_SLEEP_TIMEOUT)
@@ -245,12 +266,12 @@ void loopInput()
             {
                 // not disabled, and switch held long enough to put device to sleep, nighty night
                 goToSleep();
-                return;
+                // return;
             }
 #else
             // no brightness check, and switch held long enough to put device to sleep, nighty night
             goToSleep();
-            return;
+            // return;
 #endif
         }
 #else
@@ -379,8 +400,10 @@ void loopInput()
         interruptedByEncoder = false;
 #endif
     }
+#endif // ENABLE_INPUT
 }
 
+#ifdef ENABLE_INPUT
 void interruptSwitch()
 {
     interruptedBySwitch = true;
@@ -395,9 +418,11 @@ void interruptEncoder()
 #endif
 }
 #endif
+#endif
 
 void sleepInput()
 {
+#ifdef ENABLE_INPUT
     // reset switch timers and input buffers
     clearBuffersAndTimers = true;
 // disable interrupts as needed
@@ -410,9 +435,11 @@ void sleepInput()
     disableInterrupt(PIN_ENC_CLK);
 #endif
 #endif
+#endif
 }
 void wakeInput()
 {
+#ifdef ENABLE_INPUT
 // re-enable interrupts
 #ifndef ENC_SWITCH_WAKES_DEVICE
     enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING);
@@ -425,9 +452,11 @@ void wakeInput()
 #endif
     // ensure clear buffers is still true, post wakeup, for next cycle
     clearBuffersAndTimers = true;
+#endif
 }
 bool validWakeUp()
 {
+#ifdef ENABLE_INPUT
 // check valid wakeup types
 #ifdef ENC_SWITCH_WAKES_DEVICE
     // at least, check for that
@@ -436,6 +465,7 @@ bool validWakeUp()
         // check for invalid switch timing
         // TODO: invalid sw time
     }
+#endif
 #endif
     // the only invalid circumstance involves the switch, and we checked for that, return true
     return true;
