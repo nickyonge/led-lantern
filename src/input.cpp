@@ -10,6 +10,8 @@
 // including EnableInterrupt.h in the header file causes compile errors and for the life of me I can't figure out why
 #include <EnableInterrupt.h>
 
+static byte _loopIntervalInput = 0; // timer to keep track of loop() intervals for this class 
+
 static int encPos = 0; // current position of rotary encoder
 
 volatile bool clearBuffersAndTimers = false; // clear buffers/timers on next cycle (to avoid directly modifying them in sleep/wake cycle)
@@ -69,6 +71,18 @@ void setupInput()
 void loopInput()
 {
 #ifdef ENABLE_INPUT
+// check input loop delay
+#if defined(LOOP_INTERVAL_INPUT) && LOOP_INTERVAL_INPUT > 1
+    _loopIntervalInput += DELAY_INTERVAL;
+    if (_loopIntervalInput >= LOOP_INTERVAL_INPUT)
+    {
+        _loopIntervalInput -= LOOP_INTERVAL_INPUT;
+    }
+    else
+    {
+        return;
+    }
+#endif
     // check to clear buffers/timers from a wakeup cycle
     if (clearBuffersAndTimers)
     {
@@ -205,7 +219,7 @@ void loopInput()
 #ifdef ENCODER_SWITCH_LOGIC_POLL
     if (encSwitchPollBuffer > 0)
     {
-        encSwitchPollBuffer -= DELAY_INTERVAL;
+        encSwitchPollBuffer -= LOOP_INTERVAL_INPUT;
         if (encSwitchPollBuffer < 0)
         {
             encSwitchPollBuffer = 0;
@@ -215,7 +229,7 @@ void loopInput()
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
     if (encSwitchInterruptBuffer > 0)
     {
-        encSwitchInterruptBuffer -= DELAY_INTERVAL;
+        encSwitchInterruptBuffer -= LOOP_INTERVAL_INPUT;
         if (encSwitchInterruptBuffer < 0)
         {
             encSwitchInterruptBuffer = 0;
@@ -224,7 +238,7 @@ void loopInput()
 #endif
     if (encSwitchInputDelay > 0)
     {
-        encSwitchInputDelay -= DELAY_INTERVAL;
+        encSwitchInputDelay -= LOOP_INTERVAL_INPUT;
         if (encSwitchInputDelay < 0)
         {
             encSwitchInputDelay = 0;
@@ -236,7 +250,7 @@ void loopInput()
     if (encSwitchPoll)
     {
         // holding switch down
-        encSwitchHeldTime += DELAY_INTERVAL;
+        encSwitchHeldTime += LOOP_INTERVAL_INPUT;
 #if defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0
         // check for sleep timeout
         if (encSwitchHeldTime >= ENC_HELD_SLEEP_TIMEOUT)

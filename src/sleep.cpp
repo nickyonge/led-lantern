@@ -1,9 +1,12 @@
 #include "sleep.h"
 
 #ifdef USE_SLEEP_TIMER
-int loopsIdle = 0;
+
+static byte _loopIntervalSleep = 0; // timer to keep track of loop() intervals for this class
+
 byte secondsIdle = 0;
 byte minutesIdle = 0;
+
 #endif
 
 void setupSleep()
@@ -18,30 +21,39 @@ void setupSleep()
 void loopSleep()
 {
 #ifdef USE_SLEEP_TIMER
-    // increment idle timer
-    loopsIdle += DELAY_INTERVAL;
-    if (loopsIdle >= CYCLES_SECOND)
+    // check savedata loop delay
+#if defined(LOOP_INTERVAL_SLEEP) && LOOP_INTERVAL_SLEEP > 1
+    _loopIntervalSleep += DELAY_INTERVAL;
+    if (_loopIntervalSleep >= LOOP_INTERVAL_SLEEP)
     {
-        // increment seconds and minutes as needed
-        loopsIdle -= CYCLES_SECOND;
-        secondsIdle++;
-        if (secondsIdle >= SECONDS_PER_MIN)
+        _loopIntervalSleep -= LOOP_INTERVAL_SLEEP;
+    }
+    else
+    {
+        return;
+    }
+#else
+#error "LOOP_INTERVAL_SLEEP is not used, it should be set to 1000, as it's used to check how many ms are in one second"
+#endif
+    // passed initial loop check, increment seconds and minutes as needed
+    // one second passed
+    secondsIdle++;
+    if (secondsIdle >= SECONDS_PER_MIN)
+    {
+        // seconds overflow, increment minute
+        secondsIdle -= SECONDS_PER_MIN;
+        minutesIdle++;
+        // ensure minutesIdle does not exceed given limit
+        if (minutesIdle > MINUTES_MAX)
         {
-            // seconds overflow, increment minute
-            secondsIdle -= secondsIdle;
-            minutesIdle++;
-            // ensure minutesIdle does not exceed given limit
-            if (minutesIdle > MINUTES_MAX)
-            {
-                minutesIdle = MINUTES_MAX; // cap at MINUTES_MAX
-            }
+            minutesIdle = MINUTES_MAX; // cap at MINUTES_MAX
         }
-        // check for sleep timer limits
-        if (minutesIdle >= MINUTES_UNTIL_SLEEP && secondsIdle >= SECONDS_UNTIL_SLEEP)
-        {
-            // device has reached sleep mode timeout
-            goToSleep();
-        }
+    }
+    // check for sleep timer limits
+    if (minutesIdle >= MINUTES_UNTIL_SLEEP && secondsIdle >= SECONDS_UNTIL_SLEEP)
+    {
+        // device has reached sleep mode timeout
+        goToSleep();
     }
 #endif
 }
@@ -49,7 +61,6 @@ void loopSleep()
 void resetSleepTimer()
 {
 #ifdef USE_SLEEP_TIMER
-    loopsIdle = 0;
     secondsIdle = 0;
     minutesIdle = 0;
 #endif

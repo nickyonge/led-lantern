@@ -9,8 +9,10 @@
 #include "sleep.h"
 #include "leds.h"
 
-// #define ENABLE_INPUT // is input system enabled?
+#define ENABLE_INPUT // is input system enabled?
 #ifdef ENABLE_INPUT
+
+#define LOOP_INTERVAL_INPUT 20 // how many ms in between loop() ticks for this class?
 
 #define ENC_SWITCH_WAKES_DEVICE   // clicking the encoder switch will wake the device
 #define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
@@ -18,7 +20,7 @@
 #define POLL_ENCODER_LOOP         // poll the encoder rotation during loopInput cycle
 #define ENC_ROTATION_ACCELERATION // should encoder speed be accelerated?
 
-// #define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt?
+#define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt?
 #ifdef USE_ENCODER_SWITCH_LOGIC
 #define ENCODER_SWITCH_WAKE_INPUT_DELAY 10 // time in ms to delay reading switch input upon waking
 #define ENCODER_SWITCH_INPUT_BUFFER 10     // time in ms to buffer any input received on the encoder switch
@@ -27,7 +29,7 @@
 // #define ENCODER_SWITCH_JUMPS_LEDS          // switch input causes LEDs to jump halfway across the colour spectrum
 #ifdef ENCODER_SWITCH_LOGIC_POLL
 #define ENC_HELD_SLEEP_TIMEOUT 2000    // how long, in ms, holding the switch down takes to put the device to sleep. 0 = never. Requires poll logic
-// #define ENC_HELD_ADJUST_BRIGHTNESS 100 // how long, in ms, after holding the switch down, will rotating the encoder result adjusting brightness?
+#define ENC_HELD_ADJUST_BRIGHTNESS 100 // how long, in ms, after holding the switch down, will rotating the encoder result adjusting brightness?
 #if defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0
 #define ENC_ADJUST_BRIGHTNESS_AMT_DISABLES_SLEEP 8 // how much must the brightness value be adjusted before the sleep timeout is disabled until btn release?
 #endif

@@ -2,6 +2,8 @@
 
 #include "leds.h"
 
+static byte _loopIntervalSaveData = 0; // timer to keep track of loop() intervals for this class
+
 saveData data;
 
 EEWL eewlData(data, BUFFER_LENGTH, BUFFER_START);
@@ -43,10 +45,22 @@ void setupSaveData()
 void loopSaveData()
 {
 #ifdef ENABLE_SAVEDATA
+    // check savedata loop delay
+#if defined(LOOP_INTERVAL_SAVEDATA) && LOOP_INTERVAL_SAVEDATA > 1
+        _loopIntervalSaveData += DELAY_INTERVAL;
+        if (_loopIntervalSaveData >= LOOP_INTERVAL_SAVEDATA)
+        {
+            _loopIntervalSaveData -= LOOP_INTERVAL_SAVEDATA;
+        }
+        else
+        {
+            return;
+        }
+#endif
     // decrement save delay
     if (saveDelay > 0)
     {
-        saveDelay -= DELAY_INTERVAL;
+        saveDelay -= LOOP_INTERVAL_SAVEDATA;
         if (saveDelay < 0)
         {
             saveDelay = 0;

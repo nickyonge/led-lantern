@@ -6,9 +6,11 @@
 
 #include "main.h" // note: importing main also imports other classes needed to call wake/sleep
 
-// #define ENABLE_SLEEP // is sleep system enabled?
+#define ENABLE_SLEEP // is sleep system enabled?
 
 #ifdef ENABLE_SLEEP
+
+#define LOOP_INTERVAL_SLEEP 1000 // how many ms in between loop() ticks for this class?
 
 #define USE_SLEEP_TIMER // will the device automatically sleep after a certain time without interaction? 
 
@@ -21,8 +23,8 @@
 #define MINUTES_UNTIL_SLEEP 0 // how many minutes (plus given seconds) until device goes to sleep?
 #define SECONDS_UNTIL_SLEEP 5 // how many seconds (after minutes target is reached) until device goes to sleep?
 
-#endif // USE_SLEEP_TIMER
-#endif // ENABLE_SLEEP
+#endif // ifdef USE_SLEEP_TIMER
+#endif // ifdef ENABLE_SLEEP
 
 void setupSleep();
 void loopSleep();
