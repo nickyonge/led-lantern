@@ -2,7 +2,7 @@
 
 #ifdef USE_SLEEP_TIMER
 
-static byte _loopIntervalSleep = 0; // timer to keep track of loop() intervals for this class
+static int _loopIntervalSleep = 0; // timer to keep track of loop() intervals for this class
 
 byte secondsIdle = 0;
 byte minutesIdle = 0;

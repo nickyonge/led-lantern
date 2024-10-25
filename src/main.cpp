@@ -10,7 +10,7 @@ void setup()
     setupSleep();
     setupInput();
     setupLEDs(); // setup LEDs last (after Input)
-    
+
     // FastLED.setBrightness(64);
     // FastLED.addLeds<WS2812B, 5, GRB>(ledsTest, NUM_LEDS_TEST);
     // for (int i = 1; i < NUM_LEDS_TEST; i++)

@@ -10,9 +10,9 @@
 // including EnableInterrupt.h in the header file causes compile errors and for the life of me I can't figure out why
 #include <EnableInterrupt.h>
 
-static byte _loopIntervalInput = 0; // timer to keep track of loop() intervals for this class 
+static byte _loopIntervalInput = 0; // timer to keep track of loop() intervals for this class
 
-static int encPos = 0; // current position of rotary encoder
+static int8_t encPos = 0; // current position of rotary encoder
 
 volatile bool clearBuffersAndTimers = false; // clear buffers/timers on next cycle (to avoid directly modifying them in sleep/wake cycle)
 volatile bool interruptedBySwitch = false;   // was interrupt via enc switch called before last loop cylce?
@@ -28,19 +28,19 @@ RotaryEncoder encoder(PIN_ENC_CLK, PIN_ENC_DAT, ENC_LATCH_MODE);
 
 #ifdef USE_ENCODER_SWITCH_LOGIC
 bool encSwitchInputProcessed = false; // was an input processed by all valid sources? flag to prevent multiple firings per input
-int encSwitchInputDelay = 0;          // forced delay to prevent processing of any switch input
+byte encSwitchInputDelay = 0;         // forced delay to prevent processing of any switch input
 #ifdef ENCODER_SWITCH_LOGIC_POLL
-bool encSwitchPoll = false;  // is rotary encoder switch currently pressed, as determined by pin polling?
-int encSwitchPollBuffer = 0; // raw buffer for reading enc switch over several frames following a valid pin poll
+bool encSwitchPoll = false;   // is rotary encoder switch currently pressed, as determined by pin polling?
+byte encSwitchPollBuffer = 0; // raw buffer for reading enc switch over several frames following a valid pin poll
 #endif
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
-int encSwitchInterruptBuffer = 0; // raw buffer for reading enc switch for several frames following an interrupt
+byte encSwitchInterruptBuffer = 0; // raw buffer for reading enc switch for several frames following an interrupt
 #endif
 #if (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0) || (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0)
 int encSwitchHeldTime = 0; // if enc sleep timeout, OR hold switch for button, use `encSwitchHeldTime`
 #if (defined(ENC_HELD_ADJUST_BRIGHTNESS) && ENC_HELD_ADJUST_BRIGHTNESS > 0)
 #if (defined(ENC_HELD_SLEEP_TIMEOUT) && ENC_HELD_SLEEP_TIMEOUT > 0)
-int encBrightnessDeltaBuffer = 0;               // tracked delta valueu for enc brightness adjustment, to see about disabling `goToSleep` hold timer
+int8_t encBrightnessDeltaBuffer = 0;            // tracked delta valueu for enc brightness adjustment, to see about disabling `goToSleep` hold timer
 bool encSleepDisabledByBrightnessDelta = false; // has sleep timeout been disabled by the brightness delta?
 #endif
 #endif
@@ -59,7 +59,7 @@ void setupInput()
     // encoder switch pin
     pinMode(PIN_ENC_SWITCH, INPUT_PULLUP);
     // enable interrupt on enc switch pin
-    enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING);
+    enableInterrupt(PIN_ENC_SWITCH | PINCHANGEINTERRUPT, interruptSwitch, FALLING); // TODO: explore getting this working on ONLY falling, seems to be CHANGE atm
     // check for encoder data interrupts
 #if defined(POLL_ENCODER_INTERRUPTS) || defined(ENC_ROTATION_WAKES_DEVICE)
     enableInterrupt(PIN_ENC_DAT, interruptEncoder, CHANGE);
@@ -219,7 +219,7 @@ void loopInput()
 #ifdef ENCODER_SWITCH_LOGIC_POLL
     if (encSwitchPollBuffer > 0)
     {
-        encSwitchPollBuffer -= LOOP_INTERVAL_INPUT;
+        encSwitchPollBuffer = subtractByte(encSwitchPollBuffer, LOOP_INTERVAL_INPUT);
         if (encSwitchPollBuffer < 0)
         {
             encSwitchPollBuffer = 0;
@@ -229,7 +229,7 @@ void loopInput()
 #ifdef ENCODER_SWITCH_LOGIC_INTERRUPT
     if (encSwitchInterruptBuffer > 0)
     {
-        encSwitchInterruptBuffer -= LOOP_INTERVAL_INPUT;
+        encSwitchInterruptBuffer = subtractByte(encSwitchPollBuffer, LOOP_INTERVAL_INPUT);
         if (encSwitchInterruptBuffer < 0)
         {
             encSwitchInterruptBuffer = 0;
@@ -238,7 +238,7 @@ void loopInput()
 #endif
     if (encSwitchInputDelay > 0)
     {
-        encSwitchInputDelay -= LOOP_INTERVAL_INPUT;
+        encSwitchInputDelay = subtractByte(encSwitchInputDelay, LOOP_INTERVAL_INPUT);
         if (encSwitchInputDelay < 0)
         {
             encSwitchInputDelay = 0;
@@ -301,13 +301,13 @@ void loopInput()
 #ifdef POLL_ENCODER_LOOP
     encoder->tick();
 #endif
-    int newPos = encoder->getPosition();
+    int8_t newPos = encoder->getPosition();
 #else
     // update and read rotary encoder movement (non-interrupted)
 #ifdef POLL_ENCODER_LOOP
     encoder.tick();
 #endif
-    int newPos = encoder.getPosition();
+    int8_t newPos = encoder.getPosition();
 #endif
 
     // check for position change

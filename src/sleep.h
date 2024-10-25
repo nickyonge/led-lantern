@@ -16,7 +16,6 @@
 
 #ifdef USE_SLEEP_TIMER
 
-#define CYCLES_PER_SEC 1000 // ms equivalent, 1000 `loop()` ticks = 1 second (refer to `main.h` / `DELAY_INTERVAL`)
 #define SECONDS_PER_MIN 60  // 60s = 1 minute (it'd be bonkers to change this, but hey, maybe you just hate counting in Base60?)
 #define MINUTES_MAX 240     // 240mins = 4 hours (prevent byte overflow at 255)
 
