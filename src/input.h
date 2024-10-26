@@ -19,7 +19,7 @@
 #define ENC_ROTATION_WAKES_DEVICE // rotating the encoder will wake the device. otherwise, it must be clicked
 #define POLL_ENCODER_INTERRUPTS   // poll the encoder rotation during clk/data pin interrupts
 #define POLL_ENCODER_LOOP         // poll the encoder rotation during loopInput cycle
-#define ENC_ROTATION_ACCELERATION // should encoder speed be accelerated?
+// #define ENC_ROTATION_ACCELERATION // should encoder speed be accelerated?
 
 #define USE_ENCODER_SWITCH_LOGIC // use in-loop logic for encoder switch, beyond just interrupt?
 #ifdef USE_ENCODER_SWITCH_LOGIC
@@ -55,7 +55,7 @@ constexpr float a = (maxAccel - 1) / (shortCutoff - longCutoff); // 0.2
 constexpr float b = 1 - (longCutoff * a);                        // -9
 
 #else
-#define ENC_NONACCEL_MULTIPLIER 4 // if defined, multiply encoder delta for LED shift by this
+#define ENC_NONACCEL_MULTIPLIER 6 // if defined, multiply encoder delta for LED shift by this
 #endif
 
 #define ENC_LATCH_MODE RotaryEncoder::LatchMode::FOUR3 // latch mode to use for rotary encoder
