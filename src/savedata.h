@@ -7,7 +7,7 @@
 #include "main.h"
 #include "leds.h"
 
-// #define ENABLE_SAVEDATA // Use SaveData? SaveData should be setup first and looped last
+#define ENABLE_SAVEDATA // Use SaveData? SaveData should be setup first and looped last
 
 #define LOOP_INTERVAL_SAVEDATA 232 // how many ms in between loop() ticks for this class?
 // note: loop intervals should not be greater than 255 - (DELAY_INTERVAL * 2)

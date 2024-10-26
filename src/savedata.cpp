@@ -47,15 +47,15 @@ void loopSaveData()
 #ifdef ENABLE_SAVEDATA
     // check savedata loop delay
 #if defined(LOOP_INTERVAL_SAVEDATA) && LOOP_INTERVAL_SAVEDATA > 1
-        _loopIntervalSaveData += DELAY_INTERVAL;
-        if (_loopIntervalSaveData >= LOOP_INTERVAL_SAVEDATA)
-        {
-            _loopIntervalSaveData -= LOOP_INTERVAL_SAVEDATA;
-        }
-        else
-        {
-            return;
-        }
+    _loopIntervalSaveData += DELAY_INTERVAL;
+    if (_loopIntervalSaveData >= LOOP_INTERVAL_SAVEDATA)
+    {
+        _loopIntervalSaveData -= LOOP_INTERVAL_SAVEDATA;
+    }
+    else
+    {
+        return;
+    }
 #endif
     // decrement save delay
     if (saveDelay > 0)

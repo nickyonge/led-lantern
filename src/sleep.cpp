@@ -22,7 +22,7 @@ void loopSleep()
 {
 #ifdef USE_SLEEP_TIMER
     // check savedata loop delay
-#if defined(LOOP_INTERVAL_SLEEP) && LOOP_INTERVAL_SLEEP > 1
+// #if defined(LOOP_INTERVAL_SLEEP) && LOOP_INTERVAL_SLEEP > 1
     _loopIntervalSleep += DELAY_INTERVAL;
     if (_loopIntervalSleep >= LOOP_INTERVAL_SLEEP)
     {
@@ -32,10 +32,17 @@ void loopSleep()
     {
         return;
     }
-#else
-#error "LOOP_INTERVAL_SLEEP is not used, it should be set to 1000, as it's used to check how many ms are in one second"
-#endif
+// #else
+// #error "LOOP_INTERVAL_SLEEP is not used, it should be set to 1000, as it's used to check how many ms are in one second"
+// #endif
     // passed initial loop check, increment seconds and minutes as needed
+    // one loop passed
+    // loopsIdle++;
+    // if (loopsIdle < LOOPS_PER_SECOND)
+    // {
+    //     // simply return, cuz we only ever check for timeout when secs/mins tick
+    //     return;
+    // }
     // one second passed
     secondsIdle++;
     if (secondsIdle >= SECONDS_PER_MIN)
