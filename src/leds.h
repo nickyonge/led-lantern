@@ -35,9 +35,9 @@ void setupLEDs();
 void loopLEDs();
 
 // shift the current LED colour by the given amount (HSV hue, 0 - 255, wrapping)
-void shiftLEDColor(int delta);
+void shiftLEDColor(byte delta);
 // shift the current LED brightness by the given amount (HSV value, LED_MIN_BRIGHTNESS - 255, clamped)
-void shiftLEDBrightness(int delta);
+void shiftLEDBrightness(byte delta);
 // output the current colour information to FastLED
 void updateLEDs();
 

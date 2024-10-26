@@ -1,15 +1,15 @@
 #include "leds.h"
 
-static byte _loopIntervalLEDs = 0; // timer to keep track of loop() intervals for this class 
+static byte _loopIntervalLEDs = 0; // timer to keep track of loop() intervals for this class
 
 static bool savedLEDsThisSession = false; // on first save, ensure LEDs are updated correctly only once
 
 volatile bool queueUpdateLEDs = false; // if true, calls `updateLEDs()` at the start of the next `loopLEDs` cycle
 
 CRGB leds[NUM_LEDS];
-static int ledColor = DATA_DEFAULT_LED_HUE; // current LED HSV hue
+static byte ledColor = DATA_DEFAULT_LED_HUE; // current LED HSV hue
 
-static int ledBrightness = 255; // 0-255, 0 = `LED_MIN_BRIGHTNESS`, 255 = 255, capped by `FastLED.setBrightness(LED_MAX_BRIGHTNESS)`
+static byte ledBrightness = 255; // 0-255, 0 = `LED_MIN_BRIGHTNESS`, 255 = 255, capped by `FastLED.setBrightness(LED_MAX_BRIGHTNESS)`
 
 bool clearLEDs = false;
 
@@ -112,7 +112,7 @@ void updateLEDs()
 #ifdef ENABLE_ANIMATION
     if (clearLEDs)
     {
-        for (int i = 0; i < NUM_LEDS; i++)
+        for (byte i = 0; i < NUM_LEDS; i++)
         {
             colorsArray[i] = CRGB::Black;
         }
@@ -120,26 +120,26 @@ void updateLEDs()
     else if (!animate)
         if (!animate)
         {
-            for (int i = 0; i < NUM_LEDS; i++)
+            for (byte i = 0; i < NUM_LEDS; i++)
             {
                 colorsArray[i] = CRGB(CHSV(ledColor, 255, ledBrightness));
             }
         }
-    for (int i = 0; i < NUM_LEDS; i++)
+    for (byte i = 0; i < NUM_LEDS; i++)
     {
         leds[i] = colorsArray[i];
     }
 #else
     if (clearLEDs)
     {
-        for (int i = 0; i < NUM_LEDS; i++)
+        for (byte i = 0; i < NUM_LEDS; i++)
         {
             leds[i] = CRGB::Black;
         }
     }
     else
     {
-        for (int i = 0; i < NUM_LEDS; i++)
+        for (byte i = 0; i < NUM_LEDS; i++)
         {
             leds[i] = CRGB(CHSV(ledColor, 255, ledBrightness));
         }
@@ -157,33 +157,36 @@ void updateLEDs()
     clearLEDs = false;
 }
 
-void shiftLEDColor(int delta)
+void shiftLEDColor(byte delta)
 {
     if (delta == 0)
     {
         return;
     }
     ledColor += delta;
-    while (ledColor > 255)
-    {
-        ledColor -= 256;
-    }
-    while (ledColor < 0)
-    {
-        ledColor += 256;
-    }
+    // while (ledColor > 255)
+    // {
+    //     ledColor -= 256;
+    // }
+    // while (ledColor < 0)
+    // {
+    //     ledColor += 256;
+    // }
     updateLEDs();
     saveLEDData();
 }
 
-void shiftLEDBrightness(int delta)
+void shiftLEDBrightness(byte delta)
 {
     if (delta == 0)
     {
         return;
     }
-    ledBrightness += delta;
-    ledBrightness = constrain(ledBrightness, LED_MIN_BRIGHTNESS, 255);
+    ledBrightness = addByte(ledBrightness, delta);
+    if (ledBrightness < LED_MIN_BRIGHTNESS)
+    {
+        ledBrightness = LED_MIN_BRIGHTNESS;
+    }
     updateLEDs();
 }
 
