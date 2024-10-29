@@ -15,11 +15,16 @@ bool clearLEDs = false; // should LEDs be cleared on next updateLEDs() call?
 
 #ifdef ENABLE_ANIMATION
 Random16 rng; // random number generator
-ByteDrifter byteDrifter(rng);
 static CRGB colorsArray[NUM_LEDS];
-bool animate = true;
-bool reverseAnimDirection = false;
 int animTimer = 0;
+#ifdef ADVANCED_ANIMATION
+ByteDrifter byteDrifter(rng);
+#else
+byte brightnessFalloffValue = BRIGHTNESS_FALLOFF_MAX;  // actual value that brightness falls off
+byte brightnessFalloffTarget = BRIGHTNESS_FALLOFF_MAX; // target value for brightness falloff
+byte brightnessInterval = 0;                           // ticks (in anim fps) until next brightness falloff randomization
+byte brightnessSpeed = BRIGHTNESS_FALLOFF_SPEED_MIN;   // speed (in byte units/frame) brightnessFalloffValue moves to target
+#endif
 #endif
 
 #ifdef DEBUG_FLASH_LED_0
@@ -83,25 +88,22 @@ void loopLEDs()
         queueUpdateLEDs = true;
     }
 #endif
+#ifdef ENABLE_ANIMATION
+    // run animation
+    // check timer
+    animTimer += LOOP_INTERVAL_LEDS;
+    if (animTimer >= ANIM_FPS)
+    {
+        // reset anim timer, and animate LEDs
+        animTimer -= ANIM_FPS;
+        animateLEDs();
+    }
+#endif
     // check for queued LED update (probably from a wake cycle, or debug flash)
     if (queueUpdateLEDs)
     {
         updateLEDs();
     }
-#ifdef ENABLE_ANIMATION
-    // run animation
-    if (animate)
-    {
-        // check timer
-        animTimer += LOOP_INTERVAL_LEDS;
-        if (animTimer >= ANIM_FPS)
-        {
-            // reset anim timer, and animate LEDs
-            animTimer -= ANIM_FPS;
-            animateLEDs();
-        }
-    }
-#endif
 }
 
 //
@@ -125,14 +127,19 @@ void updateLEDs()
     {
         // not clearing LEDs, check if anim is enabled
 #ifdef ENABLE_ANIMATION
-        // animation is enabled, check if active
-        if (!animate)
+        // animation is enabled
+#ifndef ADVANCED_ANIMATION
+        byte brightness = ledBrightness;
+#endif
+        for (byte i = 0; i < NUM_LEDS; i++)
         {
-            // anim is active
-            for (byte i = 0; i < NUM_LEDS; i++)
-            {
-                colorsArray[i] = CRGB(CHSV(ledColor, 255, byteDrifter.getValue()));
-            }
+#ifdef ADVANCED_ANIMATION
+            // advanced animation using byteDrifter for brightness
+            colorsArray[i] = CRGB(CHSV(ledColor, 255, byteDrifter.getValue()));
+#else
+            colorsArray[i] = CRGB(CHSV(ledColor, 255, brightness));
+            brightness = subtractByte(brightness, brightnessFalloffValue);
+#endif
         }
         for (byte i = 0; i < NUM_LEDS; i++)
         {
@@ -155,6 +162,8 @@ void updateLEDs()
 #endif
     // reset clear LEDs
     clearLEDs = false;
+    // reset update LEDs queue
+    queueUpdateLEDs = false;
 }
 
 void shiftLEDColor(byte delta)
@@ -197,10 +206,55 @@ void testLEDColor()
 void animateLEDs()
 {
     // animation step
+#ifdef ADVANCED_ANIMATION
     byteDrifter.tick();
+#else
+    // decrement interval
+    if (brightnessInterval == 0)
+    {
+        // interval has reached zero, re-randomize target values
+        uint16_t value = rng.get();     // generate a random number between 0-65535
+        float p = value / (float)65535; // convert to float between 0.00 and 1.00
+        // p = pow(p, BRIGHTNESS_CURVE_POWER); // multiply p to a power of itself to curve
+        for (byte b = 0; b < BRIGHTNESS_CURVE_POWER; b++)
+        {
+            p *= p; // using pow used a bunch of space, just write it manually =_=
+        }
+        byte randomByte = byte((254.5 * p) + 0.5); // convert random 0.0-1.0 float to 0-255 byte
+        // assign brightnessFalloffTarget, mapped from 0-255 to falloff min/max
+        brightnessFalloffTarget = map(randomByte, 0, 255, BRIGHTNESS_FALLOFF_MIN, BRIGHTNESS_FALLOFF_MAX);
+        // re-randomize speed and interval
+        brightnessSpeed = rng.get(BRIGHTNESS_FALLOFF_SPEED_MIN, BRIGHTNESS_FALLOFF_SPEED_MAX);
+        brightnessInterval = rng.get(BRIGHTNESS_FALLOFF_INTERVAL_MIN, BRIGHTNESS_FALLOFF_INTERVAL_MAX);
+    }
+    else
+    {
+        brightnessInterval--; // interval waiting, decrement
+    }
+    // move brightness falloff value to target
+    if (brightnessFalloffValue < brightnessFalloffTarget)
+    {
+        // less than, add
+        brightnessFalloffValue = addByte(brightnessFalloffValue, brightnessSpeed, brightnessFalloffTarget);
+    }
+    else if (brightnessFalloffValue > brightnessFalloffTarget)
+    {
+        // greater than, subtract
+        brightnessFalloffValue = subtractByte(brightnessFalloffValue, brightnessSpeed, brightnessFalloffTarget);
+    }
+#endif
     updateLEDs();
 }
 #endif
+
+// #define BRIGHTNESS_FALLOFF_SPEED_MIN 2
+// #define BRIGHTNESS_FALLOFF_SPEED_MAX 12
+// #define BRIGHTNESS_FALLOFF_INTERVAL_MIN 10
+// #define BRIGHTNESS_FALLOFF_INTERVAL_MAX 60
+// byte brightnessFalloffValue = 0;
+// byte brightnessFalloffTarget = 0;
+// byte brightnessInterval = 0;
+// byte brightnessSpeed = 0;
 
 byte getLEDBrightness()
 {
