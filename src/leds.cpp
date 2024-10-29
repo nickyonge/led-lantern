@@ -11,10 +11,11 @@ static byte ledColor = DATA_DEFAULT_LED_HUE; // current LED HSV hue
 
 static byte ledBrightness = 255; // 0-255, 0 = `LED_MIN_BRIGHTNESS`, 255 = 255, capped by `FastLED.setBrightness(LED_MAX_BRIGHTNESS)`
 
-bool clearLEDs = false;
+bool clearLEDs = false; // should LEDs be cleared on next updateLEDs() call?
 
 #ifdef ENABLE_ANIMATION
-Random16 rng;
+Random16 rng; // random number generator
+ByteDrifter byteDrifter(rng);
 static CRGB colorsArray[NUM_LEDS];
 bool animate = true;
 bool reverseAnimDirection = false;
@@ -109,42 +110,41 @@ void loopLEDs()
 
 void updateLEDs()
 {
+    // first, check if we're clearing LEDs
+    if (clearLEDs)
+    {
+        for (byte i = 0; i < NUM_LEDS; i++)
+        {
 #ifdef ENABLE_ANIMATION
-    if (clearLEDs)
-    {
-        for (byte i = 0; i < NUM_LEDS; i++)
-        {
             colorsArray[i] = CRGB::Black;
-        }
-    }
-    else if (!animate)
-        if (!animate)
-        {
-            for (byte i = 0; i < NUM_LEDS; i++)
-            {
-                colorsArray[i] = CRGB(CHSV(ledColor, 255, ledBrightness));
-            }
-        }
-    for (byte i = 0; i < NUM_LEDS; i++)
-    {
-        leds[i] = colorsArray[i];
-    }
-#else
-    if (clearLEDs)
-    {
-        for (byte i = 0; i < NUM_LEDS; i++)
-        {
+#endif
             leds[i] = CRGB::Black;
         }
     }
     else
     {
+        // not clearing LEDs, check if anim is enabled
+#ifdef ENABLE_ANIMATION
+        // animation is enabled, check if active
+        if (!animate)
+        {
+            // anim is active
+            for (byte i = 0; i < NUM_LEDS; i++)
+            {
+                colorsArray[i] = CRGB(CHSV(ledColor, 255, ledBrightness));
+            }
+        }
+        for (byte i = 0; i < NUM_LEDS; i++)
+        {
+            leds[i] = colorsArray[i];
+        }
+#else
         for (byte i = 0; i < NUM_LEDS; i++)
         {
             leds[i] = CRGB(CHSV(ledColor, 255, ledBrightness));
         }
-    }
 #endif
+    }
     // check for debug LED flashing
 #ifdef DEBUG_FLASH_LED_0
     leds[0] = debugFlashOn && !clearLEDs ? CRGB::Red : CRGB::Black;
@@ -164,14 +164,6 @@ void shiftLEDColor(byte delta)
         return;
     }
     ledColor += delta;
-    // while (ledColor > 255)
-    // {
-    //     ledColor -= 256;
-    // }
-    // while (ledColor < 0)
-    // {
-    //     ledColor += 256;
-    // }
     updateLEDs();
     saveLEDData();
 }
@@ -204,6 +196,8 @@ void testLEDColor()
 #ifdef ENABLE_ANIMATION
 void animateLEDs()
 {
+    // animation step
+    updateLEDs();
 }
 #endif
 

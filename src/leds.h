@@ -8,6 +8,8 @@
 #include "pindef.h"
 #include "savedata.h"
 
+#define ENABLE_ANIMATION // allow animation rendering?
+
 #define LOOP_INTERVAL_LEDS 33 // how many ms in between loop() ticks for this class?
 
 #define CHIPSET WS2812B
@@ -24,10 +26,10 @@
 // #define LED_MAX_MILLIAMP_DRAW 250 // if defined, set max mA/H draw permitted by FastLED
 
 #define CALL_FASTLED_METHODS // call `FastLED.show` and other `FastLED.[thing]` methods? Used for debugging
-// #define ENABLE_ANIMATION // allow animation rendering?
 
 #ifdef ENABLE_ANIMATION
 #include <Random16.h>
+#include "byteDrifter.h"
 #define ANIM_FPS 30 // Frames per second the animation will render at
 #endif
 
