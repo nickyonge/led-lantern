@@ -128,7 +128,11 @@ void updateLEDs()
         // not clearing LEDs, check if anim is enabled
 #ifdef ENABLE_ANIMATION
         // animation is enabled
-#ifndef ADVANCED_ANIMATION
+#ifdef ADVANCED_ANIMATION
+        // reset iteration HERE, so we don't duplicate iterations if we only change LED color 
+        // (and thus cause iteration decay multiple times per animation frame)
+        byteDrifter.resetIteration();
+#else
         byte brightness = ledBrightness;
 #endif
         for (byte i = 0; i < NUM_LEDS; i++)
@@ -207,7 +211,7 @@ void animateLEDs()
 {
     // animation step
 #ifdef ADVANCED_ANIMATION
-    byteDrifter.tick();
+    byteDrifter.tick(false);
 #else
     // decrement interval
     if (brightnessInterval == 0)
