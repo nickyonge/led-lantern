@@ -11,7 +11,13 @@
 #error Need to import the ByteMath script by Duck Pond Studio / Nick Yonge
 #endif
 
-// #define DECAY_ENABLED // use decay to make value smaller with each iteration
+#define DECAY_ENABLED true // if true, use decay to make value smaller with each iteration
+
+// just doing this as reference for how to validly check if a #define is EXPLICITLY true,
+// also excluding false, w/o throwing an error if undefined, and only needs an #ifdef check to work
+#if defined(DECAY_ENABLED) && DECAY_ENABLED + 0 == 0
+#undef DECAY_ENABLED // false or unassigned, undef
+#endif
 
 #define VALUE_MIN 64
 #define VALUE_MAX 255
@@ -31,6 +37,13 @@
 #define DSPEED_MAX 250
 #define DINTERVAL_MIN 5
 #define DINTERVAL_MAX 45
+#endif
+
+#if defined(VCURVEPOW) && VCURVEPOW + 0 <= 0
+#undef VCURVEPOW // check to undefine an invalid VCURVEPOW
+#endif
+#if defined(DCURVEPOW) && DCURVEPOW + 0 <= 0
+#undef DCURVEPOW // check to undefine an invalid VCURVEPOW
 #endif
 
 //  192, 255, // value min/max defaults
@@ -59,10 +72,16 @@ class ByteDrifter
 public:
     ByteDrifter(
         byte valueMin, byte valueMax,
+#ifdef VCURVEPOW
+        byte vCurvePow,
+#endif
         byte vSpeedMin, byte vSpeedMax,
         byte vIntervalMin, byte vIntervalMax,
 #ifdef DECAY_ENABLED
         byte decayMin, byte decayMax,
+#ifdef DCURVEPOW
+        byte dCurvePow,
+#endif
         int8_t dModMin, int8_t dModMax,
         byte dDivisor,
         byte dSpeedMin, byte dSpeedMax,
@@ -98,11 +117,17 @@ public:
     }
     ByteDrifter(Random16 &rng)
         : ByteDrifter(
-              VALUE_MIN, VALUE_MAX,         // value min/max defaults
+              VALUE_MIN, VALUE_MAX, // value min/max defaults
+#ifdef VCURVEPOW
+              VCURVEPOW, // value random curve power
+#endif
               VSPEED_MIN, VSPEED_MAX,       // vSpeed min/max defaults
               VINTERVAL_MIN, VINTERVAL_MAX, // vInterval min/max defaults
 #ifdef DECAY_ENABLED
-              DECAY_MIN, DECAY_MAX,         // decay min/max defaults
+              DECAY_MIN, DECAY_MAX, // decay min/max defaults
+#ifdef DCURVEPOW
+              DCURVEPOW, // decay random curve power
+#endif
               DMOD_MIN, DMOD_MAX,           // dMod min/max defaults (signed, -128 ~ 127)
               DDIVISOR,                     // dDivisor default (divide decay by this before value iteration)
               DSPEED_MIN, DSPEED_MAX,       // dSpeed min/max defaults
@@ -220,12 +245,12 @@ private:
     byte _value;     // target value
     byte _vSpeed;    // value speed
     byte _vInterval; // value interval
-#if defined(VCURVEPOW) && VCURVEPOW > 0
+#ifdef VCURVEPOW
     byte _vCurvePow; // value curve power
 #endif
 #ifdef DECAY_ENABLED
-    byte _decay;        // target decay
-#if defined(DCURVEPOW) && DCURVEPOW > 0
+    byte _decay; // target decay
+#ifdef DCURVEPOW
     byte _dCurvePow;
 #endif
     int8_t _dMod;       // target dMod
@@ -273,14 +298,22 @@ private:
 
     void randomizeValue()
     {
+#ifdef VCURVEPOW
+        _value = curvedLerpByte(_rng.get(), _valueMin, _valueMax, _vCurvePow);
+#else
         _value = _rng.get(_valueMin, _valueMax);
+#endif
         _vSpeed = _rng.get(_vSpeedMin, _vSpeedMax);
         _vInterval = _rng.get(_vIntervalMin, _vIntervalMax);
     }
 #ifdef DECAY_ENABLED
     void randomizeDecay()
     {
+#ifdef DCURVEPOW
+        _decay = curvedLerpByte(_rng.get(), _decayMin, _decayMax, _dCurvePow);
+#else
         _decay = _rng.get(_decayMin, _decayMax);
+#endif
         _dMod = (int8_t)_rng.get((byte)_dModMin, (byte)_dModMax);
         _dSpeed = _rng.get(_dSpeedMin, _dSpeedMax);
         _dInterval = _rng.get(_dIntervalMin, _dIntervalMax);
