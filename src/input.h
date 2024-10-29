@@ -8,7 +8,7 @@
 #include "pindef.h"
 #include "sleep.h"
 #include "leds.h"
-#include "bytemath.h"
+#include "byteMath.h"
 
 #define ENABLE_INPUT // is input system enabled?
 #ifdef ENABLE_INPUT
