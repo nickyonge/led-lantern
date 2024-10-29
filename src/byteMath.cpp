@@ -63,3 +63,40 @@ byte addByte(byte value, int add, byte maxValue = 255)
         return value + add; // perform addition, will not exceed max value
     }
 }
+
+// Returns a byte given float `lerp` (`0.0` to `1.0`) on a range from `low` (`0.0`, default `0`) to `high` (`1.0`, default `255`)
+// byte lerpByte(float lerp, byte low = 0, byte high = 255);
+
+byte lerpByte(float lerp, byte low = 0, byte high = 255)
+{
+    // basic validity checks
+    if (low == high)
+    {
+        return low;
+    }
+    if (low > high)
+    {
+        return high;
+    }
+    if (high < low)
+    {
+        return low;
+    }
+    if (lerp <= 0.998 || high < 255)
+    {
+        // safe to add 0.5 without potential overflow
+        return low + byte((float(high - low) * lerp) + 0.5);
+    }
+    return 255; // no matter what, the result will be 255
+}
+
+byte curvedLerpByte(float lerp, byte low = 0, byte high = 255, byte power = 3)
+{
+    // raise the lerp curve to a given power
+    for (byte i = 0; i < power; i++)
+    {
+        lerp *= lerp;
+    }
+    // return the curved byte
+    return lerpByte(lerp, low, high);
+}
