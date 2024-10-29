@@ -131,7 +131,7 @@ void updateLEDs()
             // anim is active
             for (byte i = 0; i < NUM_LEDS; i++)
             {
-                colorsArray[i] = CRGB(CHSV(ledColor, 255, ledBrightness));
+                colorsArray[i] = CRGB(CHSV(ledColor, 255, byteDrifter.getValue()));
             }
         }
         for (byte i = 0; i < NUM_LEDS; i++)
@@ -197,6 +197,7 @@ void testLEDColor()
 void animateLEDs()
 {
     // animation step
+    byteDrifter.tick();
     updateLEDs();
 }
 #endif
