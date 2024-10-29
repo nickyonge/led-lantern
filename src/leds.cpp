@@ -129,7 +129,7 @@ void updateLEDs()
 #ifdef ENABLE_ANIMATION
         // animation is enabled
 #ifdef ADVANCED_ANIMATION
-        // reset iteration HERE, so we don't duplicate iterations if we only change LED color 
+        // reset iteration HERE, so we don't duplicate iterations if we only change LED color
         // (and thus cause iteration decay multiple times per animation frame)
         byteDrifter.resetIteration();
 #else
@@ -139,7 +139,9 @@ void updateLEDs()
         {
 #ifdef ADVANCED_ANIMATION
             // advanced animation using byteDrifter for brightness
-            colorsArray[i] = CRGB(CHSV(ledColor, 255, byteDrifter.getValue()));
+            byte brightness = byteDrifter.getValue();
+            // apply colour if brightness exceeds min value, otherwise, set black
+            colorsArray[i] = brightness >= LED_MIN_BRIGHTNESS ? CRGB(CHSV(ledColor, 255, brightness)) : CRGB::Black;
 #else
             colorsArray[i] = CRGB(CHSV(ledColor, 255, brightness));
             brightness = subtractByte(brightness, brightnessFalloffValue);
