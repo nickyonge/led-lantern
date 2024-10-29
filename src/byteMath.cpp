@@ -100,6 +100,18 @@ byte curvedLerpByte(float lerp, byte low = 0, byte high = 255, byte power = 3)
     // return the curved byte
     return lerpByte(lerp, low, high);
 }
+byte curvedLerpByte(byte lerp, byte low = 0, byte high = 255, byte power = 3)
+{
+    return curvedLerpByte(byteToFloat01(lerp), low, high, power);
+}
+byte curvedLerpByte(int16_t lerp, byte low = 0, byte high = 255, byte power = 3)
+{
+    return curvedLerpByte(intToFloat01(lerp), low, high, power);
+}
+byte curvedLerpByte(uint16_t lerp, byte low = 0, byte high = 255, byte power = 3)
+{
+    return curvedLerpByte(uint16ToFloat01(lerp), low, high, power);
+}
 
 float byteToFloat01(byte input)
 {
