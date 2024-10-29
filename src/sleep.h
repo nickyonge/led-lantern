@@ -20,7 +20,7 @@
 #define MINUTES_MAX 240    // 240mins = 4 hours (prevent byte overflow at 255)
 
 #define MINUTES_UNTIL_SLEEP 0 // how many minutes (plus given seconds) until device goes to sleep?
-#define SECONDS_UNTIL_SLEEP 5 // how many seconds (after minutes target is reached) until device goes to sleep?
+#define SECONDS_UNTIL_SLEEP 30 // how many seconds (after minutes target is reached) until device goes to sleep?
 
 #endif // ifdef USE_SLEEP_TIMER
 #endif // ifdef ENABLE_SLEEP

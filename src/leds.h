@@ -28,7 +28,7 @@
 #define CALL_FASTLED_METHODS // call `FastLED.show` and other `FastLED.[thing]` methods? Used for debugging
 
 #ifdef ENABLE_ANIMATION
-// #define ADVANCED_ANIMATION // use ByteDrifter for animation?
+#define ADVANCED_ANIMATION // use ByteDrifter for animation?
 #include <Random16.h>
 #define ANIM_FPS 30 // Frames per second the animation will render at
 #ifdef ADVANCED_ANIMATION
