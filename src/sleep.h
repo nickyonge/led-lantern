@@ -6,7 +6,7 @@
 
 #include "main.h" // note: importing main also imports other classes needed to call wake/sleep
 
-#define ENABLE_SLEEP // is sleep system enabled?
+// #define ENABLE_SLEEP // is sleep system enabled?
 
 #ifdef ENABLE_SLEEP
 

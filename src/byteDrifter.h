@@ -11,7 +11,7 @@
 #error Need to import the ByteMath script by Duck Pond Studio / Nick Yonge
 #endif
 
-#define DECAY_ENABLED true // if true, use decay to make value smaller with each iteration
+#define DECAY_ENABLED false // if true, use decay to make value smaller with each iteration
 
 // just doing this as reference for how to validly check if a #define is EXPLICITLY true,
 // also excluding false, w/o throwing an error if undefined, and only needs an #ifdef check to work
@@ -259,12 +259,10 @@ private:
     byte _dSpeed;       // decay speed
     byte _dInterval;    // decay interval
 #endif
-
     byte _actualValue; // actual value
 #ifdef DECAY_ENABLED
     byte _actualDecay; // actual decay
 #endif
-
     byte _iteratedValue; // actual value + iterations
 #ifdef DECAY_ENABLED
     byte _iteratedDecay; // actual decay + iterations
@@ -299,7 +297,37 @@ private:
     void randomizeValue()
     {
 #ifdef VCURVEPOW
-        _value = curvedLerpByte(_rng.get(), _valueMin, _valueMax, _vCurvePow);
+        uint32_t rand = (uint32_t)_rng.get();
+        uint32_t result = rand;
+        for (byte i = 1; i < _vCurvePow; i++) {
+            result *= rand;
+        }
+        byte shiftAmount = 16 + (8 * (_vCurvePow - 1));
+        _value = (byte)(result >> shiftAmount);
+
+        // if (squared > 100) {
+        //     _value = 128;
+        // } else {
+        // _value = 127;
+        // }
+        // float f = r / (float)UINT16_MAX;
+        // for (byte i = 0; i < _vCurvePow; i++)
+        // {
+        //     f *= f;
+        // }
+
+        // // return low + byte((float(high - low) * lerp) + 0.5);
+        // byte b = _valueMin + byte((float(_valueMax - _valueMin) * f) + 0.5);
+
+        // if (b > 127)
+        // {
+        //     _value = 128;
+        // }
+        // else
+        // {
+        //     _value = 127;
+        // }
+        // _value = curvedLerpByte(_rng.get(), _valueMin, _valueMax, _vCurvePow);
 #else
         _value = _rng.get(_valueMin, _valueMax);
 #endif

@@ -16,7 +16,7 @@ byte subtractByte(byte value, int subtract, byte minValue = 0)
 {
     return addByte(value, subtract * -1, minValue); // "add" negative int
 }
-byte addByte(byte value, byte add, byte maxValue = 255)
+byte addByte(byte value, byte add, byte maxValue = UINT8_MAX)
 {
     if (value >= maxValue)
     {
@@ -28,7 +28,7 @@ byte addByte(byte value, byte add, byte maxValue = 255)
     }
     return value + add; // perform addition, will not exceed max value
 }
-byte addByte(byte value, int add, byte maxValue = 255)
+byte addByte(byte value, int add, byte maxValue = UINT8_MAX)
 {
     if (add == 0)
     {
@@ -64,10 +64,7 @@ byte addByte(byte value, int add, byte maxValue = 255)
     }
 }
 
-// Returns a byte given float `lerp` (`0.0` to `1.0`) on a range from `low` (`0.0`, default `0`) to `high` (`1.0`, default `255`)
-// byte lerpByte(float lerp, byte low = 0, byte high = 255);
-
-byte lerpByte(float lerp, byte low = 0, byte high = 255)
+byte lerpByte(float lerp, byte low = 0, byte high = UINT8_MAX)
 {
     // basic validity checks
     if (low == high)
@@ -82,15 +79,37 @@ byte lerpByte(float lerp, byte low = 0, byte high = 255)
     {
         return low;
     }
-    if (lerp <= 0.998 || high < 255)
+    if (lerp <= 0.998 || high < UINT8_MAX)
     {
         // safe to add 0.5 without potential overflow
         return low + byte((float(high - low) * lerp) + 0.5);
     }
-    return 255; // no matter what, the result will be 255
+    return UINT8_MAX; // no matter what, the result will be 255
+}
+byte lerpByte(float lerp, byte low = 0, byte high = UINT8_MAX)
+{
+    // basic validity checks
+    if (low == high)
+    {
+        return low;
+    }
+    if (low > high)
+    {
+        return high;
+    }
+    if (high < low)
+    {
+        return low;
+    }
+    if (lerp <= 0.998 || high < UINT8_MAX)
+    {
+        // safe to add 0.5 without potential overflow
+        return low + byte((float(high - low) * lerp) + 0.5);
+    }
+    return UINT8_MAX; // no matter what, the result will be 255
 }
 
-byte curvedLerpByte(float lerp, byte low = 0, byte high = 255, byte power = 3)
+byte curvedLerpByte(float lerp, byte low = 0, byte high = UINT8_MAX, byte power = 3)
 {
     // raise the lerp curve to a given power
     for (byte i = 0; i < power; i++)
@@ -100,15 +119,15 @@ byte curvedLerpByte(float lerp, byte low = 0, byte high = 255, byte power = 3)
     // return the curved byte
     return lerpByte(lerp, low, high);
 }
-byte curvedLerpByte(byte lerp, byte low = 0, byte high = 255, byte power = 3)
+byte curvedLerpByte(byte lerp, byte low = 0, byte high = UINT8_MAX, byte power = 3)
 {
     return curvedLerpByte(byteToFloat01(lerp), low, high, power);
 }
-byte curvedLerpByte(int16_t lerp, byte low = 0, byte high = 255, byte power = 3)
+byte curvedLerpByte(int16_t lerp, byte low = 0, byte high = UINT8_MAX, byte power = 3)
 {
     return curvedLerpByte(intToFloat01(lerp), low, high, power);
 }
-byte curvedLerpByte(uint16_t lerp, byte low = 0, byte high = 255, byte power = 3)
+byte curvedLerpByte(uint16_t lerp, byte low = 0, byte high = UINT8_MAX, byte power = 3)
 {
     return curvedLerpByte(uint16ToFloat01(lerp), low, high, power);
 }
