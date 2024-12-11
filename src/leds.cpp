@@ -41,7 +41,7 @@ void setupLEDs()
 // prep LEDs
 #ifdef CALL_FASTLED_METHODS
     FastLED.setBrightness(LED_MAX_BRIGHTNESS);
-    FastLED.addLeds<CHIPSET, PIN_LED_DATA, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<CHIPSET, PIN_LED_DATA, RGB_ORDER>(leds, NUM_LEDS);
 
 #ifdef LED_MAX_MILLIAMP_DRAW
     FastLED.setMaxPowerInVoltsAndMilliamps(5, LED_MAX_MILLIAMP_DRAW);
