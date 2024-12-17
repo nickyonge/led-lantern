@@ -13,30 +13,31 @@
 
 /* PINOUT DIAGRAMS FOR ATTINYX4 / ATTINYX5
 
-                               ATtinyX4
-                              .--------.
-          VCC [2.7-5.5V] - 1 =| O      |= 14 - GND
-       10(0),X1,PCI8,PB0 - 2 =|        |= 13 - 0(10),A0,PCI0,PA0
-        9(1),X2,PCI9,PB1 - 3 =|        |= 12 - 1(9),A1,TXD,PCI1,PA1
-  RESET,11(11),PCI11,PB3 - 4 =|        |= 11 - 2(8),A2,RXD,PCI2,PA2
-     8(2),INT0,PCI10,PB2 - 5 <|        |= 10 - 3(7),A3,PCI3,PA3
-        7(3),A7,PCI7,PA7 - 6 <|        |= 9  - 4(6),A4,SCK/SCL,PCI4,PA4
- 6(4),A6,SDA/DI,PCI6,PA6 - 7 <|        |> 8  - 5(5),A5,DO,PCI5,PA5
-                              '--------'
+                             ATtinyX4
+                            ┌───╥┬───╖
+          VCC [2.7-5.5V] - ≥╡ ● ╙┘   ╠≥ - GND
+       10(0),X1,PCI8,PB0 - =╡   D    ╠= - 0(10),A0,PCI0,PA0
+        9(1),X2,PCI9,PB1 - =╡   I    ╠= - 1(9),A1,TXD,PCI1,PA1
+  RESET,11(11),PCI11,PB3 - =╡   P    ╠= - 2(8),A2,RXD,PCI2,PA2
+     8(2),INT0,PCI10,PB2 - ≈╡   1    ╠= - 3(7),A3,PCI3,PA3
+        7(3),A7,PCI7,PA7 - ≈╡   4    ╠= - 4(6),A4,SCK/SCL,PCI4,PA4
+ 6(4),A6,SDA/DI,PCI6,PA6 - ≈╡        ╠≈ - 5(5),A5,DO,PCI5,PA5
+                            ╘════════╝
 
-                               ATtinyX5
-                              .--------.
-     RESET,5,A0,PCI5,PB5 - 1 =| O      |= 8 - VCC [2.7-5.5V]
-        3,A3,X1,PCI3,PB3 - 2 =|        |= 7 - 2,INT0,A1,SCK/SCL,PCI2,PB2
-        4,A2,X2,PCI4,PB4 - 3 <|        |> 6 - 1,DO,RXD,PCI1,PB1
-                     GND - 4 =|        |> 5 - 0,DI,TXD,SDA,PCI0,PB0
-                              '--------'
+                             ATtinyX5
+                            ┌───╥┬───╖
+     RESET,5,A0,PCI5,PB5 - =╡ ● ╙┘   ╠≤ - VCC [2.7-5.5V]
+        3,A3,X1,PCI3,PB3 - =╡   D    ╠= - 2,INT0,A1,SCK/SCL,PCI2,PB2
+        4,A2,X2,PCI4,PB4 - ≈╡   8    ╠≈ - 1,DO,RXD,PCI1,PB1
+                     GND - ≤╡        ╠≈ - 0,DI,TXD,SDA,PCI0,PB0
+                            ╘════════╝
 
     = - Pin
-    > - PWM Pin
+    ≈ - PWM Pin
+  ≥/≤ - VCC / GND Pins (inward to chip is VCC, outward is GND)
  4(6) - Arduino Pins, with CW(CCW) pinout (CCW on ATtinyX4 only)
- PCI - Pin Change Interrupt (PCINT) pins
- INT - External Interrupt pins
+  PCI - Pin Change Interrupt (PCINT) pins
+  INT - External Interrupt pins
 RESET - Reset Pin (fuses must be set to use)
 DI/DO - Data In/Data Out (aka MOSI/MISO)
 PA/PB - Port pins, Port A and Port B (PA on ATtinyX4 only)
