@@ -1,4 +1,4 @@
-#include "byteMath.h"
+#include "bytemath.h"
 
 byte subtractByte(byte value, byte subtract, byte minValue = 0)
 {
@@ -62,6 +62,73 @@ byte addByte(byte value, int add, byte maxValue = UINT8_MAX)
         }
         return value + add; // perform addition, will not exceed max value
     }
+}
+
+byte int1024ToByte(int value, bool clamp = true)
+{
+    if (clamp)
+    {
+        // clamp 0-1023
+        if (value < 0)
+        {
+            value = 0;
+        }
+        else if (value >= 1024)
+        {
+            value = 1023;
+        }
+    }
+    else
+    {
+        // modulo 0-1023
+        value %= 1024;
+    }
+    // bitshift to 8bit, convert to byte, return
+    return byte(value >> 2);
+}
+
+int byteToInt1024(byte value, bool clampLimits = true, bool solveFor256 = true)
+{
+    if (clampLimits)
+    {
+        if (value == 0)
+        {
+            return 0;
+        }
+        if (value == 255) {
+            return 1023;
+        }
+    }
+    // convert to int
+    int i = value;
+    // bitshift to 10bit
+    i = i << 2;
+    // if solving for 256, multiply value by 256/255, 
+    // or approx 1.0039, providing a more accurately 
+    // scaled result, instead of essentially value * 4.
+    // eg, without clamping, inputting 255 would return
+    // 1020, making 1023 impossible to attain. this skews
+    // the math so that the output scales from 0-1023,
+    // instead of 0-(255*4).
+    // note however, that this performs float multiplication,
+    // which likely offset the above bitwise performance gains.
+    if (solveFor256) {
+        i *= 1.0039;// approx 256/255
+    }
+    return i;
+}
+
+float byteToFloat01(byte input)
+{
+    return (float)input / (float)UINT8_MAX;
+}
+float intToFloat01(int16_t input)
+{
+    return uint16ToFloat01((uint16_t)input);
+}
+float uint16ToFloat01(uint16_t input)
+{
+    return (float)input / (float)UINT16_MAX;
 }
 
 byte lerpByte(float lerp, byte low = 0, byte high = UINT8_MAX)
@@ -130,17 +197,4 @@ byte curvedLerpByte(int16_t lerp, byte low = 0, byte high = UINT8_MAX, byte powe
 byte curvedLerpByte(uint16_t lerp, byte low = 0, byte high = UINT8_MAX, byte power = 3)
 {
     return curvedLerpByte(uint16ToFloat01(lerp), low, high, power);
-}
-
-float byteToFloat01(byte input)
-{
-    return (float)input / (float)UINT8_MAX;
-}
-float intToFloat01(int16_t input)
-{
-    return uint16ToFloat01((uint16_t)input);
-}
-float uint16ToFloat01(uint16_t input)
-{
-    return (float)input / (float)UINT16_MAX;
 }

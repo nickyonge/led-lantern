@@ -20,6 +20,20 @@ byte addByte(byte value, byte add, byte maxValue = UINT8_MAX);
 // Capped to 0-`maxValue`, default `maxValue = 255`
 byte addByte(byte value, int add, byte maxValue = UINT8_MAX);
 
+// --- Convert byte and int values for 8bit/10bit analog purposes
+
+// Converts int `value` from a value of `0`-`1023` to a byte `0`-`255`, using efficient bitshifting.
+// If `clamp` is `true` (default), clamps `value` to `0` min, `1023` max. If `false`, uses modulo `1024`.
+byte int1024ToByte(int value, bool clamp = true);
+
+// Converts int `value` from a value of `0`-`1023` to a byte `0`-`255`, using efficient bitshifting.
+// If `clamp` is `true` (default), clamps `value` to `0` min, `1023` max. If `false`, uses modulo `1024`.
+
+// Converts byte `value` from a value of `0`-`255` to an int `0`-`1023`, using efficient bitshifting.
+// If `clampLimits` is `true` (default), `0` and `255` automatically return `0` and `1023`, respectively.
+// If `solveFor256` is `true` (default), final value is multiplied by `(256/255)`, giving a slightly more accurate output.
+int byteToInt1024(byte value, bool clampLimits = true, bool solveFor256 = true);
+
 // --- Convert byte and int values to 0.0-1.0 normalized floats
 //     (I know, technically it's some non-byte math, oops ^_^ )
 
