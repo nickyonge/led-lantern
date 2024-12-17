@@ -95,7 +95,8 @@ int byteToInt1024(byte value, bool clampLimits = true, bool solveFor256 = true)
         {
             return 0;
         }
-        if (value == 255) {
+        if (value == 255)
+        {
             return 1023;
         }
     }
@@ -103,8 +104,8 @@ int byteToInt1024(byte value, bool clampLimits = true, bool solveFor256 = true)
     int i = value;
     // bitshift to 10bit
     i = i << 2;
-    // if solving for 256, multiply value by 256/255, 
-    // or approx 1.0039, providing a more accurately 
+    // if solving for 256, multiply value by 256/255,
+    // or approx 1.0039, providing a more accurately
     // scaled result, instead of essentially value * 4.
     // eg, without clamping, inputting 255 would return
     // 1020, making 1023 impossible to attain. this skews
@@ -112,8 +113,9 @@ int byteToInt1024(byte value, bool clampLimits = true, bool solveFor256 = true)
     // instead of 0-(255*4).
     // note however, that this performs float multiplication,
     // which likely offset the above bitwise performance gains.
-    if (solveFor256) {
-        i *= 1.0039;// approx 256/255
+    if (solveFor256)
+    {
+        i *= 1.0039; // approx 256/255
     }
     return i;
 }
@@ -131,28 +133,6 @@ float uint16ToFloat01(uint16_t input)
     return (float)input / (float)UINT16_MAX;
 }
 
-byte lerpByte(float lerp, byte low = 0, byte high = UINT8_MAX)
-{
-    // basic validity checks
-    if (low == high)
-    {
-        return low;
-    }
-    if (low > high)
-    {
-        return high;
-    }
-    if (high < low)
-    {
-        return low;
-    }
-    if (lerp <= 0.998 || high < UINT8_MAX)
-    {
-        // safe to add 0.5 without potential overflow
-        return low + byte((float(high - low) * lerp) + 0.5);
-    }
-    return UINT8_MAX; // no matter what, the result will be 255
-}
 byte lerpByte(float lerp, byte low = 0, byte high = UINT8_MAX)
 {
     // basic validity checks
